@@ -87,6 +87,18 @@ set(PROJECT_SOURCES
         modules/attendance/attendancerepository.h
         modules/attendance/attendancerepository.cpp
 
+        # Facility System
+        ui/facility/facilitysystem.h
+        ui/facility/facilitysystem.cpp
+        ui/facility/buildingdialog.h
+        ui/facility/buildingdialog.cpp
+        ui/facility/roomdialog.h
+        ui/facility/roomdialog.cpp
+        modules/facility/facilityrepository.h
+        modules/facility/facilityrepository.cpp
+        modules/facility/building.h
+        modules/facility/room.h
+
         ${TS_FILES}
 )
 

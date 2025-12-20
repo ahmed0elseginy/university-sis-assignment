@@ -174,6 +174,21 @@ void DatabaseManager::initSchema()
                "date DATETIME, "
                "target_role VARCHAR(50))").arg(autoInc)); // All, Student, Faculty
 
+    // Facility Management
+    query.exec(QString("CREATE TABLE IF NOT EXISTS buildings ("
+               "id %1, "
+               "name VARCHAR(100), "
+               "code VARCHAR(20), "
+               "location VARCHAR(200))").arg(autoInc));
+
+    query.exec(QString("CREATE TABLE IF NOT EXISTS rooms ("
+               "id %1, "
+               "building_id INT, "
+               "room_number VARCHAR(20), "
+               "type VARCHAR(50), "
+               "capacity INT, "
+               "FOREIGN KEY (building_id) REFERENCES buildings(id) ON DELETE CASCADE)").arg(autoInc));
+
      // Seed admin user if not exists
      QSqlQuery seed;
      // SQLite uses INSERT OR IGNORE, MySQL uses INSERT IGNORE.

@@ -6,7 +6,9 @@
 #include "ui/finance/financesystem.h"
 #include "ui/enrollment/enrollmentsystem.h"
 #include "ui/attendance/attendancesystem.h"
+
 #include "ui/faculty/facultysystem.h"
+#include "ui/facility/facilitysystem.h"
 #include "ui/login/logindialog.h"
 #include "ui/profile/profilewidget.h"
 #include "utils/thememanager.h"
@@ -150,7 +152,7 @@ void MainWindow::setupUi(const QString& role, int userId)
     // Common Dashboard
     new QListWidgetItem("📊 Dashboard", m_sidebar);
     
-    bool isAdmin = (role == "Administrator");
+    bool isAdmin = (role.contains("Admin", Qt::CaseInsensitive));
     bool isStudent = (role == "Student");
     bool isFaculty = (role == "Faculty Member");
     bool isFinance = (role == "Finance Officer");
@@ -184,7 +186,12 @@ void MainWindow::setupUi(const QString& role, int userId)
         new QListWidgetItem("👨‍🏫 Faculty & Staff", m_sidebar);
     }
     
-    // 7. Library (All)
+    // 7. Facility System (Admin, Faculty)
+    if (isAdmin || isFaculty) {
+        new QListWidgetItem("🏢 Facilities", m_sidebar);
+    }
+    
+    // 8. Library (All)
     new QListWidgetItem("📖 Library System", m_sidebar);
     
     // 8. News (All)
@@ -269,6 +276,7 @@ void MainWindow::setupUi(const QString& role, int userId)
     addModule(new AttendanceSystem(this), "Attendance");
     addModule(new FinanceSystem(this), "Payment");
     addModule(new FacultySystem(this), "Faculty");
+    addModule(new FacilitySystem(this), "Facilities");
     
     // Placeholders for Library/News
     auto library = new QLabel("Library System (Under Construction)"); library->setAlignment(Qt::AlignCenter);
