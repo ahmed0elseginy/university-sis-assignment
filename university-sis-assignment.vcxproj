@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B87EBE8C-F18D-49A0-8E99-6899C49BA9FC}</ProjectGuid>
+    <Keyword>QtVS_v304</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtModules>core;gui;widgets;sql</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtModules>core;gui;widgets;sql</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>.\university-sis;.\university-sis\database;.\university-sis\modules;.\university-sis\ui;.\university-sis\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>.\university-sis;.\university-sis\database;.\university-sis\modules;.\university-sis\ui;.\university-sis\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="university-sis\main.cpp" />
+    <ClCompile Include="university-sis\mainwindow.cpp" />
+    <ClCompile Include="university-sis\database\databasemanager.cpp" />
+    <ClCompile Include="university-sis\modules\academic\courserepository.cpp" />
+    <ClCompile Include="university-sis\modules\academic\sectionrepository.cpp" />
+    <ClCompile Include="university-sis\modules\attendance\attendancerepository.cpp" />
+    <ClCompile Include="university-sis\modules\enrollment\enrollmentrepository.cpp" />
+    <ClCompile Include="university-sis\modules\faculty\facultyrepository.cpp" />
+    <ClCompile Include="university-sis\modules\finance\paymentrepository.cpp" />
+    <ClCompile Include="university-sis\modules\student\studentrepository.cpp" />
+    <ClCompile Include="university-sis\ui\basesystemwidget.cpp" />
+    <ClCompile Include="university-sis\ui\studentportal.cpp" />
+    <ClCompile Include="university-sis\ui\academic\academicsystem.cpp" />
+    <ClCompile Include="university-sis\ui\academic\coursedialog.cpp" />
+    <ClCompile Include="university-sis\ui\academic\sectiondialog.cpp" />
+    <ClCompile Include="university-sis\ui\attendance\attendancedialog.cpp" />
+    <ClCompile Include="university-sis\ui\attendance\attendancesystem.cpp" />
+    <ClCompile Include="university-sis\ui\enrollment\enrollmentdialog.cpp" />
+    <ClCompile Include="university-sis\ui\enrollment\enrollmentsystem.cpp" />
+    <ClCompile Include="university-sis\ui\faculty\facultydialog.cpp" />
+    <ClCompile Include="university-sis\ui\faculty\facultysystem.cpp" />
+    <ClCompile Include="university-sis\ui\finance\financesystem.cpp" />
+    <ClCompile Include="university-sis\ui\finance\paymentdialog.cpp" />
+    <ClCompile Include="university-sis\ui\login\logindialog.cpp" />
+    <ClCompile Include="university-sis\ui\profile\profilewidget.cpp" />
+    <ClCompile Include="university-sis\ui\student\studentdialog.cpp" />
+    <ClCompile Include="university-sis\utils\thememanager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="university-sis\mainwindow.h" />
+    <QtMoc Include="university-sis\ui\basesystemwidget.h" />
+    <QtMoc Include="university-sis\ui\studentportal.h" />
+    <QtMoc Include="university-sis\ui\academic\academicsystem.h" />
+    <QtMoc Include="university-sis\ui\academic\coursedialog.h" />
+    <QtMoc Include="university-sis\ui\academic\sectiondialog.h" />
+    <QtMoc Include="university-sis\ui\attendance\attendancedialog.h" />
+    <QtMoc Include="university-sis\ui\attendance\attendancesystem.h" />
+    <QtMoc Include="university-sis\ui\enrollment\enrollmentdialog.h" />
+    <QtMoc Include="university-sis\ui\enrollment\enrollmentsystem.h" />
+    <QtMoc Include="university-sis\ui\faculty\facultydialog.h" />
+    <QtMoc Include="university-sis\ui\faculty\facultysystem.h" />
+    <QtMoc Include="university-sis\ui\finance\financesystem.h" />
+    <QtMoc Include="university-sis\ui\finance\paymentdialog.h" />
+    <QtMoc Include="university-sis\ui\login\logindialog.h" />
+    <QtMoc Include="university-sis\ui\profile\profilewidget.h" />
+    <QtMoc Include="university-sis\ui\student\studentdialog.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="university-sis\database\databasemanager.h" />
+    <ClInclude Include="university-sis\modules\academic\course.h" />
+    <ClInclude Include="university-sis\modules\academic\courserepository.h" />
+    <ClInclude Include="university-sis\modules\academic\section.h" />
+    <ClInclude Include="university-sis\modules\academic\sectionrepository.h" />
+    <ClInclude Include="university-sis\modules\attendance\attendance.h" />
+    <ClInclude Include="university-sis\modules\attendance\attendancerepository.h" />
+    <ClInclude Include="university-sis\modules\enrollment\enrollment.h" />
+    <ClInclude Include="university-sis\modules\enrollment\enrollmentrepository.h" />
+    <ClInclude Include="university-sis\modules\faculty\faculty.h" />
+    <ClInclude Include="university-sis\modules\faculty\facultyrepository.h" />
+    <ClInclude Include="university-sis\modules\finance\payment.h" />
+    <ClInclude Include="university-sis\modules\finance\paymentrepository.h" />
+    <ClInclude Include="university-sis\modules\student\student.h" />
+    <ClInclude Include="university-sis\modules\student\studentrepository.h" />
+    <ClInclude Include="university-sis\utils\thememanager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="university-sis\resources.qrc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

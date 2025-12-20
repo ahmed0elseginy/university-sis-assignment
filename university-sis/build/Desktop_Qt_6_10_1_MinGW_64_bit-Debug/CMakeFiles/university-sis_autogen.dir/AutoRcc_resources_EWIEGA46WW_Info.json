@@ -1,0 +1,25 @@
+{
+	"BUILD_DIR" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/university-sis_autogen",
+	"CMAKE_BINARY_DIR" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug",
+	"CMAKE_CURRENT_BINARY_DIR" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug",
+	"CMAKE_CURRENT_SOURCE_DIR" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis",
+	"CMAKE_SOURCE_DIR" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis",
+	"CROSS_CONFIG" : false,
+	"GENERATOR" : "Ninja",
+	"INCLUDE_DIR" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/university-sis_autogen/include",
+	"INPUTS" : 
+	[
+		"C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/resources/images/login_bg.jpg"
+	],
+	"LOCK_FILE" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/university-sis_autogen.dir/AutoRcc_resources_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "--no-zstd", "-name", "resources" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_resources.cpp",
+	"RCC_EXECUTABLE" : "C:/QT/6.10.1/mingw_64/bin/rcc.exe",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/university-sis_autogen.dir/AutoRcc_resources_EWIEGA46WW_Used.txt",
+	"SOURCE" : "C:/Users/HazeX01/Documents/GitHub/nctu-worksprace/c-plus-plus/university-sis/university-sis/resources.qrc",
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}
