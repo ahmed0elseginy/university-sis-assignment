@@ -2,6 +2,7 @@
 #include "database/databasemanager.h"
 #include "ui/studentportal.h"
 #include "ui/academic/academicsystem.h"
+#include "ui/academic/sectionsystem.h"
 #include "ui/finance/financesystem.h"
 #include "ui/enrollment/enrollmentsystem.h"
 #include "ui/attendance/attendancesystem.h"
@@ -159,9 +160,10 @@ void MainWindow::setupUi(const QString& role, int userId)
         new QListWidgetItem("🎓 Student Portal", m_sidebar);
     }
     
-    // 2. Academic System (Admin, Faculty)
+    // 2. Courses (Admin, Faculty)
     if (isAdmin || isFaculty) {
-        new QListWidgetItem("📚 Academic System", m_sidebar);
+        new QListWidgetItem("📚 Courses Catalog", m_sidebar);
+        new QListWidgetItem("🏗️ Class Sections", m_sidebar);
     }
     
     // 3. Enrollment (Admin, Student)
@@ -258,7 +260,8 @@ void MainWindow::setupUi(const QString& role, int userId)
     auto studentPortal = new StudentPortal(this);
     studentPortal->setUserContext(role, userId);
     addModule(studentPortal, "Student Portal");
-    addModule(new AcademicSystem(this), "Academic System");
+    addModule(new AcademicSystem(this), "Courses Catalog");
+    addModule(new SectionSystem(this), "Class Sections");
     auto enrollmentSys = new EnrollmentSystem(this);
     enrollmentSys->setUserContext(role, userId);
     addModule(enrollmentSys, "Enrollment");

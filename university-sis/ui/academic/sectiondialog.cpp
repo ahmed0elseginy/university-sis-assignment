@@ -1,12 +1,23 @@
 #include "sectiondialog.h"
 
-SectionDialog::SectionDialog(QWidget *parent)
+SectionDialog::SectionDialog(QWidget *parent, const Section* section)
     : QDialog(parent)
 {
-    setWindowTitle("Create Section");
+    QString title = section ? "Edit Section" : "Create Section";
+    setWindowTitle(title);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setMinimumWidth(300);
     setupUi();
+    
+    if (section) {
+        m_section = *section;
+        // Find index for courseId
+        int idx = m_courseCombo->findData(section->courseId);
+        if(idx >= 0) m_courseCombo->setCurrentIndex(idx);
+        
+        m_maxEdit->setValue(section->maxStudents);
+        m_saveBtn->setText("Update");
+    }
 }
 
 void SectionDialog::setupUi()
@@ -22,16 +33,21 @@ void SectionDialog::setupUi()
     QFormLayout *formLayout = new QFormLayout();
     formLayout->setSpacing(15);
 
-    m_courseIdEdit = new QSpinBox();
-    m_courseIdEdit->setRange(1, 999999);
-    m_courseIdEdit->setStyleSheet("QSpinBox { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }");
+    m_courseCombo = new QComboBox();
+    m_courseCombo->setStyleSheet("QComboBox { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }");
+    
+    // Load Courses
+    auto courses = m_courseRepo.getAllCourses();
+    for(const auto& c : courses) {
+        m_courseCombo->addItem(c.name + " (" + QString::number(c.year) + ")", c.id);
+    }
     
     m_maxEdit = new QSpinBox();
     m_maxEdit->setRange(1, 1000);
     m_maxEdit->setValue(30);
     m_maxEdit->setStyleSheet("QSpinBox { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }");
 
-    formLayout->addRow(new QLabel("Course ID:"), m_courseIdEdit);
+    formLayout->addRow(new QLabel("Select Course:"), m_courseCombo);
     formLayout->addRow(new QLabel("Capacity:"), m_maxEdit);
 
     mainLayout->addLayout(formLayout);
@@ -53,7 +69,7 @@ void SectionDialog::setupUi()
 
 void SectionDialog::onSave()
 {
-    m_section.courseId = m_courseIdEdit->value();
+    m_section.courseId = m_courseCombo->currentData().toInt();
     m_section.maxStudents = m_maxEdit->value();
     accept();
 }

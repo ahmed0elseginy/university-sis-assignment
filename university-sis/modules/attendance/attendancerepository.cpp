@@ -22,6 +22,23 @@ bool AttendanceRepository::addAttendance(const Attendance& att) {
     return true;
 }
 
+bool AttendanceRepository::updateAttendance(const Attendance& att) {
+    QSqlDatabase db = DatabaseManager::instance().getDatabase();
+    QSqlQuery query(db);
+    query.prepare("UPDATE attendance SET student_id=:sid, course_id=:cid, date=:date, status=:stat WHERE attendance_id=:id");
+    query.bindValue(":sid", att.studentId);
+    query.bindValue(":cid", att.courseId);
+    query.bindValue(":date", att.date);
+    query.bindValue(":stat", att.status);
+    query.bindValue(":id", att.id);
+    
+    if (!query.exec()) {
+        qDebug() << "Update Attendance Error:" << query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 bool AttendanceRepository::deleteAttendance(int id) {
     QSqlDatabase db = DatabaseManager::instance().getDatabase();
     QSqlQuery query(db);
@@ -50,4 +67,22 @@ std::vector<Attendance> AttendanceRepository::getAllAttendance() {
         list.push_back(a);
     }
     return list;
+}
+
+std::optional<Attendance> AttendanceRepository::getAttendanceById(int id) {
+    QSqlDatabase db = DatabaseManager::instance().getDatabase();
+    QSqlQuery query(db);
+    query.prepare("SELECT attendance_id, student_id, course_id, date, status FROM attendance WHERE attendance_id = :id");
+    query.bindValue(":id", id);
+    
+    if (query.exec() && query.next()) {
+        Attendance a;
+        a.id = query.value(0).toInt();
+        a.studentId = query.value(1).toInt();
+        a.courseId = query.value(2).toInt();
+        a.date = query.value(3).toDate();
+        a.status = query.value(4).toString();
+        return a;
+    }
+    return std::nullopt;
 }

@@ -1,13 +1,23 @@
 #include "attendancedialog.h"
 
-AttendanceDialog::AttendanceDialog(QWidget *parent)
+AttendanceDialog::AttendanceDialog(QWidget *parent, const Attendance* attendance)
     : QDialog(parent)
 {
-    setWindowTitle("Record Attendance");
+    QString title = attendance ? "Edit Attendance" : "Record Attendance";
+    setWindowTitle(title);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setMinimumWidth(350);
     
     setupUi();
+    
+    if (attendance) {
+        m_attendance = *attendance;
+        m_studentIdEdit->setValue(attendance->studentId);
+        m_courseIdEdit->setValue(attendance->courseId);
+        m_statusEdit->setCurrentText(attendance->status);
+        m_dateEdit->setDate(attendance->date);
+        m_saveBtn->setText("Update");
+    }
 }
 
 void AttendanceDialog::setupUi()
