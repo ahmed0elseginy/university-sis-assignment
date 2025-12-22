@@ -35,6 +35,14 @@ set(PROJECT_SOURCES
         ui/profile/profilewidget.cpp
         ui/basesystemwidget.h
         ui/basesystemwidget.cpp
+
+        # News System
+        ui/news/newssystem.h
+        ui/news/newssystem.cpp
+        
+        # Library System
+        ui/library/librarysystem.h
+        ui/library/librarysystem.cpp
         
         # Academic System
         ui/academic/academicsystem.h
@@ -94,10 +102,10 @@ set(PROJECT_SOURCES
         ui/facility/buildingdialog.cpp
         ui/facility/roomdialog.h
         ui/facility/roomdialog.cpp
-        modules/facility/facilityrepository.h
-        modules/facility/facilityrepository.cpp
         modules/facility/building.h
         modules/facility/room.h
+        modules/facility/facilityrepository.h
+        modules/facility/facilityrepository.cpp
 
         ${TS_FILES}
 )

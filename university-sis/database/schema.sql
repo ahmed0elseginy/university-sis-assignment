@@ -38,9 +38,26 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Insert Admin
-INSERT IGNORE INTO users (username, password, role) VALUES ('admin', 'admin123', 'admin');
+INSERT IGNORE INTO users (username, password, role) VALUES ('admin', '1234', 'admin');
 
 -- Sample Data
 INSERT INTO students (first_name, last_name, enrollment_date, major) VALUES 
 ('Alice', 'Smith', CURDATE(), 'Computer Science'),
 ('Bob', 'Jones', CURDATE(), 'Mathematics');
+
+-- Infrastructure
+CREATE TABLE IF NOT EXISTS buildings (
+    building_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    code VARCHAR(20) UNIQUE,
+    location VARCHAR(200)
+);
+
+CREATE TABLE IF NOT EXISTS rooms (
+    room_id INT AUTO_INCREMENT PRIMARY KEY,
+    building_id INT,
+    room_number VARCHAR(20),
+    type VARCHAR(50),
+    capacity INT,
+    FOREIGN KEY (building_id) REFERENCES buildings(building_id) ON DELETE CASCADE
+);

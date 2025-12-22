@@ -13,7 +13,7 @@
 class SectionDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit SectionDialog(QWidget *parent = nullptr, const Section* section = nullptr);
+    explicit SectionDialog(QWidget *parent = nullptr);
     Section getSection() const;
 
 private slots:
@@ -22,13 +22,12 @@ private slots:
 private:
     void setupUi();
     
-    QComboBox *m_courseCombo;
+    QSpinBox *m_courseIdEdit;
     QSpinBox *m_maxEdit;
     QPushButton *m_saveBtn;
     QPushButton *m_cancelBtn;
 
     Section m_section;
-    CourseRepository m_courseRepo;
 };
 
 #endif // SECTIONDIALOG_H

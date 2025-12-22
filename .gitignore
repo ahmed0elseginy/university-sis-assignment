@@ -361,3 +361,25 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# CMake build directories
+build/
+**/build/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/.cmake/
+
+# Qt Creator
+.qtcreator/
+*.pro.user
+*.pro.user.*
+
+# Database files (generated)
+*.db
+*.sqlite
+*.sqlite3
+
+# Qt MOC generated files
+**/moc_*.cpp
+**/qrc_*.cpp
+**/ui_*.h

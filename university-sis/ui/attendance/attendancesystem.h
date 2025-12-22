@@ -19,7 +19,6 @@ public:
 
 private slots:
     void onAddAttendance();
-    void editAttendance(int id);
     void deleteAttendance(int id);
     void refreshData();
 

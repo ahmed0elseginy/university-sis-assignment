@@ -2,15 +2,15 @@
 #include "database/databasemanager.h"
 #include "ui/studentportal.h"
 #include "ui/academic/academicsystem.h"
-#include "ui/academic/sectionsystem.h"
 #include "ui/finance/financesystem.h"
 #include "ui/enrollment/enrollmentsystem.h"
 #include "ui/attendance/attendancesystem.h"
-
 #include "ui/faculty/facultysystem.h"
 #include "ui/facility/facilitysystem.h"
 #include "ui/login/logindialog.h"
 #include "ui/profile/profilewidget.h"
+#include "ui/library/librarysystem.h"
+#include "ui/news/newssystem.h"
 #include "utils/thememanager.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent)
         statusBar()->showMessage("Connected as: " + session.username + " (" + session.role + ")", 5000);
     }
 
-    setupUi(session.role, session.userId);
+    setupUi(session.username, session.role, session.userId);
     
     // Set window properties
     setWindowTitle("University SIS - " + session.role + " Dashboard");
@@ -122,7 +122,7 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::setupUi(const QString& role, int userId)
+void MainWindow::setupUi(const QString& username, const QString& role, int userId)
 {
     // Cleanup if re-initializing (Logout/Login cycle)
     if (centralWidget()) {
@@ -152,7 +152,7 @@ void MainWindow::setupUi(const QString& role, int userId)
     // Common Dashboard
     new QListWidgetItem("📊 Dashboard", m_sidebar);
     
-    bool isAdmin = (role.contains("Admin", Qt::CaseInsensitive));
+    bool isAdmin = (role == "Administrator");
     bool isStudent = (role == "Student");
     bool isFaculty = (role == "Faculty Member");
     bool isFinance = (role == "Finance Officer");
@@ -162,10 +162,9 @@ void MainWindow::setupUi(const QString& role, int userId)
         new QListWidgetItem("🎓 Student Portal", m_sidebar);
     }
     
-    // 2. Courses (Admin, Faculty)
+    // 2. Academic System (Admin, Faculty)
     if (isAdmin || isFaculty) {
-        new QListWidgetItem("📚 Courses Catalog", m_sidebar);
-        new QListWidgetItem("🏗️ Class Sections", m_sidebar);
+        new QListWidgetItem("📚 Academic System", m_sidebar);
     }
     
     // 3. Enrollment (Admin, Student)
@@ -186,12 +185,12 @@ void MainWindow::setupUi(const QString& role, int userId)
         new QListWidgetItem("👨‍🏫 Faculty & Staff", m_sidebar);
     }
     
-    // 7. Facility System (Admin, Faculty)
+    // Facility System (Admin, Faculty)
     if (isAdmin || isFaculty) {
         new QListWidgetItem("🏢 Facilities", m_sidebar);
     }
     
-    // 8. Library (All)
+    // 7. Library (All)
     new QListWidgetItem("📖 Library System", m_sidebar);
     
     // 8. News (All)
@@ -222,27 +221,6 @@ void MainWindow::setupUi(const QString& role, int userId)
 
 
     
-    // CAPTURE USERNAME for Profile (We only have role passed to setupUi currently)
-    // To fix this properly, setupUi should take Session or we store Session.
-    // For now, we will query DatabaseManager or just assume a placeholder if not stored.
-    // Ideally, pass 'session' to setupUi. But signature is (role).
-    // Let's assume the session is stored in the LoginDialog execution scope which we don't have here.
-    // However, the MainWindow constructor had 'session' variable.
-    // We should probably update setupUi to take 'Session session' or store it.
-    // For this quick fix, we'll extract username from window title or just pass "User".
-    // Actually, let's fix the call site in constructor to pass session.username too, but that requires header change.
-    // A simpler way: The status bar has the username!
-    // QString currentUsername = "User"; // Placeholder logic 
-    // But wait, we can just fetch it from the DatabaseManager if we stored it there? No.
-    // Since we can't easily change the signature without changing header, let's just use "CurrentUser" for now
-    // OR, better, let's update header now since we are editing files.
-    // Actually, I can just use a transient member variable or assume a generic name.
-    // Let's stick to "User" for now to ensure compilation, or try to get it from window title which we set in constructor.
-    
-    QString displayUser = windowTitle().split(" - ").value(0, "User"); // Hacky but works if title set previously
-    // Wait, title is set AFTER setupUi in constructor...
-    // Let's just use "User" for now. The functionality is what matters.
-    
     // Initialize Modules
     // BETTER APPROACH: Add ALL pages to stack, and sidebar click maps to specific index or finding by name.
     // For simplicity in this demo, we will add ALL potential widgets to the stack, 
@@ -267,8 +245,7 @@ void MainWindow::setupUi(const QString& role, int userId)
     auto studentPortal = new StudentPortal(this);
     studentPortal->setUserContext(role, userId);
     addModule(studentPortal, "Student Portal");
-    addModule(new AcademicSystem(this), "Courses Catalog");
-    addModule(new SectionSystem(this), "Class Sections");
+    addModule(new AcademicSystem(this), "Academic System");
     auto enrollmentSys = new EnrollmentSystem(this);
     enrollmentSys->setUserContext(role, userId);
     addModule(enrollmentSys, "Enrollment");
@@ -278,15 +255,14 @@ void MainWindow::setupUi(const QString& role, int userId)
     addModule(new FacultySystem(this), "Faculty");
     addModule(new FacilitySystem(this), "Facilities");
     
-    // Placeholders for Library/News
-    auto library = new QLabel("Library System (Under Construction)"); library->setAlignment(Qt::AlignCenter);
-    addModule(library, "Library");
+    // Library System
+    addModule(new LibrarySystem(this), "Library System");
     
-    auto news = new QLabel("News & Announcements (Under Construction)"); news->setAlignment(Qt::AlignCenter);
-    addModule(news, "News");
+    // News & Info
+    addModule(new NewsSystem(this), "News & Info");
 
     // Profile
-    auto profileWidget = new ProfileWidget("Current User", role, this);
+    auto profileWidget = new ProfileWidget(username, role, this);
     addModule(profileWidget, "Profile");
     
     connect(profileWidget, &ProfileWidget::logoutRequested, this, &MainWindow::logout);
@@ -346,7 +322,7 @@ void MainWindow::logout()
         statusBar()->showMessage("Connected as: " + session.username + " (" + session.role + ")", 5000);
         setWindowTitle("University SIS - " + session.role + " Dashboard");
         
-        setupUi(session.role, session.userId);
+        setupUi(session.username, session.role, session.userId);
         
         // Use a dirty hack to update the profile widget with the correct username since we didn't pass it to setupUi
         // In a real app we'd refactor setupUi to take Session.

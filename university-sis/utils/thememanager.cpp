@@ -135,6 +135,53 @@ QString ThemeManager::getLightStyle()
         QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
             height: 0px;
         }
+
+        /* Tabs */
+        QTabWidget::pane { border: none; }
+        QTabBar::tab {
+            padding: 8px 16px;
+            margin-right: 4px;
+            border-radius: 6px;
+            background: #E5E5EA;
+            color: #48484A;
+            font-weight: 500;
+        }
+        QTabBar::tab:selected {
+            background: #007AFF;
+            color: white;
+        }
+        QTabBar::tab:hover:!selected {
+            background: #D1D1D6;
+        }
+
+        /* Specialized Buttons */
+        QPushButton[type="primary"] {
+            background-color: #007AFF;
+            color: white;
+            border: none;
+        }
+        QPushButton[type="primary"]:hover { background-color: #0062CC; }
+
+        QPushButton[type="success"] {
+            background-color: #34C759;
+            color: white;
+            border: none;
+        }
+        QPushButton[type="success"]:hover { background-color: #248A3D; }
+
+        QPushButton[type="danger"] {
+            background-color: #FF3B30;
+            color: white;
+            border: none;
+        }
+        QPushButton[type="danger"]:hover { background-color: #D70015; }
+
+        QPushButton[type="info"] {
+            background-color: #E3F2FD;
+            color: #007AFF;
+            border: none;
+        }
+        QPushButton[type="info"]:hover { background-color: #D1E9FC; }
     )";
 }
 
@@ -214,6 +261,53 @@ QString ThemeManager::getDarkStyle()
         QPushButton:pressed { 
             background-color: #48484A; 
         }
+
+        /* Tabs */
+        QTabWidget::pane { border: none; }
+        QTabBar::tab {
+            padding: 8px 16px;
+            margin-right: 4px;
+            border-radius: 6px;
+            background: #2C2C2E;
+            color: #AEAEB2;
+            font-weight: 500;
+        }
+        QTabBar::tab:selected {
+            background: #0A84FF;
+            color: white;
+        }
+        QTabBar::tab:hover:!selected {
+            background: #3A3A3C;
+        }
+
+        /* Specialized Buttons */
+        QPushButton[type="primary"] {
+            background-color: #0A84FF;
+            color: white;
+            border: none;
+        }
+        QPushButton[type="primary"]:hover { background-color: #0071E3; }
+
+        QPushButton[type="success"] {
+            background-color: #30D158;
+            color: black; /* Better contrast on bright green */
+            border: none;
+        }
+        QPushButton[type="success"]:hover { background-color: #28CD41; }
+
+        QPushButton[type="danger"] {
+            background-color: #FF453A;
+            color: white;
+            border: none;
+        }
+        QPushButton[type="danger"]:hover { background-color: #FF3B30; }
+
+        QPushButton[type="info"] {
+            background-color: rgba(10, 132, 255, 0.15);
+            color: #0A84FF;
+            border: none;
+        }
+        QPushButton[type="info"]:hover { background-color: rgba(10, 132, 255, 0.25); }
         
         /* Inputs */
         QLineEdit, QDateEdit, QSpinBox { 

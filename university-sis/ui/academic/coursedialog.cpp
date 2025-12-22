@@ -24,7 +24,7 @@ void CourseDialog::setupUi()
 
     // Header
     QLabel *titleLabel = new QLabel(m_isEdit ? "Update Course" : "Register Course");
-    titleLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 10px;");
+    titleLabel->setStyleSheet("font-size: 18px; font-weight: bold; margin-bottom: 10px;");
     mainLayout->addWidget(titleLabel);
 
     // Form
@@ -34,16 +34,15 @@ void CourseDialog::setupUi()
 
     m_nameEdit = new QLineEdit();
     m_nameEdit->setPlaceholderText("Course Name");
-    m_nameEdit->setStyleSheet("QLineEdit { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; } "
-                              "QLineEdit:focus { border: 2px solid #3498db; }");
+    // global theme
 
     m_yearEdit = new QSpinBox();
     m_yearEdit->setRange(1, 6);
-    m_yearEdit->setStyleSheet("QSpinBox { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }");
+    // global theme
     
     m_hoursEdit = new QSpinBox();
     m_hoursEdit->setRange(1, 10);
-    m_hoursEdit->setStyleSheet("QSpinBox { padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }");
+    // global theme
 
     // Pre-fill if edit
     if (m_isEdit) {
@@ -64,13 +63,10 @@ void CourseDialog::setupUi()
 
     m_cancelBtn = new QPushButton("Cancel");
     m_cancelBtn->setCursor(Qt::PointingHandCursor);
-    m_cancelBtn->setStyleSheet("QPushButton { background-color: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; } "
-                               "QPushButton:hover { background-color: #7f8c8d; }");
     
     m_saveBtn = new QPushButton(m_isEdit ? "Save" : "Add");
     m_saveBtn->setCursor(Qt::PointingHandCursor);
-    m_saveBtn->setStyleSheet("QPushButton { background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; } "
-                             "QPushButton:hover { background-color: #2980b9; }");
+    m_saveBtn->setProperty("type", "primary");
 
     btnLayout->addWidget(m_cancelBtn);
     btnLayout->addWidget(m_saveBtn);

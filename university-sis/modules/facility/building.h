@@ -8,6 +8,10 @@ struct Building {
     QString name;
     QString code;
     QString location;
+
+    bool isValid() const {
+        return !name.isEmpty() && !code.isEmpty();
+    }
 };
 
 #endif // BUILDING_H

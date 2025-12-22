@@ -108,7 +108,14 @@ void DatabaseManager::initSchema()
                "name VARCHAR(100), "
                "email VARCHAR(100), "
                "department VARCHAR(50), "
-               "position VARCHAR(50))").arg(autoInc));
+               "position VARCHAR(50), "
+               "username VARCHAR(50) UNIQUE, "
+               "password VARCHAR(50))").arg(autoInc));
+
+    // Migration for Faculty
+    query.exec("ALTER TABLE faculty ADD COLUMN username VARCHAR(50)");
+    query.exec("ALTER TABLE faculty ADD COLUMN password VARCHAR(50)");
+    query.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_faculty_username ON faculty(username)");
 
     // Courses Table
     query.exec(QString("CREATE TABLE IF NOT EXISTS courses ("
@@ -174,26 +181,26 @@ void DatabaseManager::initSchema()
                "date DATETIME, "
                "target_role VARCHAR(50))").arg(autoInc)); // All, Student, Faculty
 
-    // Facility Management
+    // Infrastructure / Facility System
     query.exec(QString("CREATE TABLE IF NOT EXISTS buildings ("
-               "id %1, "
+               "building_id %1, "
                "name VARCHAR(100), "
-               "code VARCHAR(20), "
+               "code VARCHAR(20) UNIQUE, "
                "location VARCHAR(200))").arg(autoInc));
 
     query.exec(QString("CREATE TABLE IF NOT EXISTS rooms ("
-               "id %1, "
+               "room_id %1, "
                "building_id INT, "
                "room_number VARCHAR(20), "
-               "type VARCHAR(50), "
+               "type VARCHAR(50), " // Lab, Lecture Hall, etc.
                "capacity INT, "
-               "FOREIGN KEY (building_id) REFERENCES buildings(id) ON DELETE CASCADE)").arg(autoInc));
+               "FOREIGN KEY (building_id) REFERENCES buildings(building_id) ON DELETE CASCADE)").arg(autoInc));
 
      // Seed admin user if not exists
      QSqlQuery seed;
      // SQLite uses INSERT OR IGNORE, MySQL uses INSERT IGNORE.
      // Standard SQL: check existence first or catch error. Simplest cross-db approach:
-     seed.prepare("INSERT INTO users (user_id, password_hash, role, display_name) VALUES (1, 'admin123', 'ADMIN', 'Administrator')");
+     seed.prepare("INSERT INTO users (user_id, password_hash, role, display_name) VALUES (1, '1234', 'ADMIN', 'Administrator')");
      if(!seed.exec()) {
          // Ignore error if already exists (constraint violation)
      }

@@ -12,6 +12,7 @@
 #include <QPainterPath>
 #include "../../database/databasemanager.h"
 #include "../../modules/student/studentrepository.h"
+#include "../../modules/faculty/facultyrepository.h"
 
 // Custom Widget for Background with Image
 class BackgroundWidget : public QWidget {
@@ -181,7 +182,7 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     
     // Defaults for demo
     m_userEdit->setText("admin");
-    m_passEdit->setText("admin123");
+    m_passEdit->setText("1234");
     
     m_userEdit->setFocus();
 }
@@ -218,17 +219,41 @@ void LoginDialog::onLogin()
     // unless you want to lock it down. Let's keep existing simulation for non-students for simplicity 
     // BUT verify against admin hardcoded creds if role is Admin to be slightly safer.
     
+    // 3. Authenticate Faculty
+    if (role == "Faculty Member") {
+        FacultyRepository repo;
+        auto faculty = repo.authenticate(user, pass);
+        if (faculty) {
+            m_session.username = faculty->username.isEmpty() ? faculty->name : faculty->username;
+            m_session.role = "Faculty Member";
+            m_session.userId = faculty->id;
+            accept();
+            return;
+        } else {
+            // Check fallback demo credentials
+            if (user == "faculty" && pass == "faculty123") {
+                m_session.username = "Dr. Simulation";
+                m_session.role = "Faculty Member";
+                m_session.userId = 999;
+                accept();
+                return;
+            }
+             QMessageBox::critical(this, "Login Failed", "Invalid credentials for Faculty.");
+             return;
+        }
+    }
+
     if (role == "Administrator") {
-        if (user == "admin" && pass == "admin123") {
+        if (user == "admin" && pass == "1234") {
             m_session.username = "Administrator";
             m_session.role = "Administrator";
             m_session.userId = 1;
             accept();
         } else {
-             QMessageBox::critical(this, "Login Failed", "Invalid Admin credentials (try admin/admin123).");
+             QMessageBox::critical(this, "Login Failed", "Invalid Admin credentials (try admin/1234).");
         }
     } else {
-        // Fallback for Faculty/Finance simulation (auto-allow for demo)
+        // Fallback for Finance/Others simulation
         m_session.username = user;
         m_session.role = role;
         m_session.userId = 999; 

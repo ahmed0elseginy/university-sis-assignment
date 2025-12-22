@@ -19,7 +19,7 @@ private slots:
     void logout();
 
 private:
-    void setupUi(const QString& role, int userId);
+    void setupUi(const QString& username, const QString& role, int userId);
 
     QWidget *m_centralWidget;
     QListWidget *m_sidebar;

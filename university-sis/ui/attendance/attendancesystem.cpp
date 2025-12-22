@@ -36,8 +36,8 @@ void AttendanceSystem::setupUi()
     // Table
     m_view = new QTableView(this);
     m_model = new QStandardItemModel(this);
-    m_model->setColumnCount(6);
-    m_model->setHorizontalHeaderLabels({"ID", "Student ID", "Course ID", "Status", "Date", "Actions"});
+    m_model->setColumnCount(5);
+    m_model->setHorizontalHeaderLabels({"ID", "Student ID", "Course ID", "Status", "Date"});
     
     m_view->setModel(m_model);
     styleTable();
@@ -82,27 +82,6 @@ void AttendanceSystem::loadAttendance()
         row << new QStandardItem(a.date.toString("yyyy-MM-dd"));
         
         m_model->appendRow(row);
-        
-        // Actions
-        QWidget* actionWidget = new QWidget();
-        QHBoxLayout* layout = new QHBoxLayout(actionWidget);
-        layout->setContentsMargins(4, 4, 4, 4);
-        
-        QPushButton* editBtn = new QPushButton("Edit");
-        editBtn->setStyleSheet("QPushButton { background-color: #E3F2FD; color: #1565C0; border: none; border-radius: 6px; padding: 4px 8px; font-weight: bold; }");
-        
-        QPushButton* deleteBtn = new QPushButton("Delete");
-        deleteBtn->setStyleSheet("QPushButton { background-color: #FFEBEE; color: #C62828; border: none; border-radius: 6px; padding: 4px 8px; font-weight: bold; }");
-        
-        layout->addWidget(editBtn);
-        layout->addWidget(deleteBtn);
-        layout->addStretch();
-        
-        int attId = a.id;
-        connect(editBtn, &QPushButton::clicked, this, [this, attId]() { editAttendance(attId); });
-        connect(deleteBtn, &QPushButton::clicked, this, [this, attId]() { deleteAttendance(attId); });
-        
-        m_view->setIndexWidget(m_model->index(m_model->rowCount() - 1, 5), actionWidget);
     }
 }
 
@@ -120,29 +99,9 @@ void AttendanceSystem::onAddAttendance()
     }
 }
 
-void AttendanceSystem::editAttendance(int id)
-{
-    auto opt = m_repo.getAttendanceById(id);
-    if (opt) {
-        AttendanceDialog dialog(this, &(*opt));
-        if (dialog.exec() == QDialog::Accepted) {
-            Attendance updated = dialog.getAttendance();
-            updated.id = id;
-            if (m_repo.updateAttendance(updated)) {
-                refreshData();
-                QMessageBox::information(this, "Success", "Attendance updated.");
-            }
-        }
-    }
-}
-
 void AttendanceSystem::deleteAttendance(int id)
 {
-    if (QMessageBox::Yes == QMessageBox::question(this, "Confirm", "Delete this attendance record?")) {
-        if (m_repo.deleteAttendance(id)) {
-            refreshData();
-        }
-    }
+    // Not exposed in UI for now, but method exists
 }
 
 void AttendanceSystem::refreshData()

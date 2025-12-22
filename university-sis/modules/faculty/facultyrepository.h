@@ -15,6 +15,7 @@ public:
     
     std::vector<Faculty> getAllFaculty();
     std::optional<Faculty> getFacultyById(int id);
+    std::optional<Faculty> authenticate(const QString& username, const QString& password);
 };
 
 #endif // FACULTYREPOSITORY_H

@@ -15,7 +15,7 @@
 class AttendanceDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit AttendanceDialog(QWidget *parent = nullptr, const Attendance* attendance = nullptr);
+    explicit AttendanceDialog(QWidget *parent = nullptr);
     Attendance getAttendance() const;
 
 private slots:

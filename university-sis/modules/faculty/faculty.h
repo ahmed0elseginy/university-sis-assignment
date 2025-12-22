@@ -9,6 +9,8 @@ struct Faculty {
     QString email;
     QString department;
     QString position; // e.g. Professor, Lecturer
+    QString username;
+    QString password;
 };
 
 #endif // FACULTY_H
