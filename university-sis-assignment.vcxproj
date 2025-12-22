@@ -98,6 +98,7 @@
     <ClCompile Include="university-sis\modules\attendance\attendancerepository.cpp" />
     <ClCompile Include="university-sis\modules\enrollment\enrollmentrepository.cpp" />
     <ClCompile Include="university-sis\modules\faculty\facultyrepository.cpp" />
+    <ClCompile Include="university-sis\modules\facility\facilityrepository.cpp" />
     <ClCompile Include="university-sis\modules\finance\paymentrepository.cpp" />
     <ClCompile Include="university-sis\modules\student\studentrepository.cpp" />
     <ClCompile Include="university-sis\ui\basesystemwidget.cpp" />
@@ -116,6 +117,11 @@
     <ClCompile Include="university-sis\ui\login\logindialog.cpp" />
     <ClCompile Include="university-sis\ui\profile\profilewidget.cpp" />
     <ClCompile Include="university-sis\ui\student\studentdialog.cpp" />
+    <ClCompile Include="university-sis\ui\facility\facilitysystem.cpp" />
+    <ClCompile Include="university-sis\ui\facility\buildingdialog.cpp" />
+    <ClCompile Include="university-sis\ui\facility\roomdialog.cpp" />
+    <ClCompile Include="university-sis\ui\library\librarysystem.cpp" />
+    <ClCompile Include="university-sis\ui\news\newssystem.cpp" />
     <ClCompile Include="university-sis\utils\thememanager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +142,11 @@
     <QtMoc Include="university-sis\ui\login\logindialog.h" />
     <QtMoc Include="university-sis\ui\profile\profilewidget.h" />
     <QtMoc Include="university-sis\ui\student\studentdialog.h" />
+    <QtMoc Include="university-sis\ui\facility\facilitysystem.h" />
+    <QtMoc Include="university-sis\ui\facility\buildingdialog.h" />
+    <QtMoc Include="university-sis\ui\facility\roomdialog.h" />
+    <QtMoc Include="university-sis\ui\library\librarysystem.h" />
+    <QtMoc Include="university-sis\ui\news\newssystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="university-sis\database\databasemanager.h" />
@@ -149,6 +160,9 @@
     <ClInclude Include="university-sis\modules\enrollment\enrollmentrepository.h" />
     <ClInclude Include="university-sis\modules\faculty\faculty.h" />
     <ClInclude Include="university-sis\modules\faculty\facultyrepository.h" />
+    <ClInclude Include="university-sis\modules\facility\building.h" />
+    <ClInclude Include="university-sis\modules\facility\room.h" />
+    <ClInclude Include="university-sis\modules\facility\facilityrepository.h" />
     <ClInclude Include="university-sis\modules\finance\payment.h" />
     <ClInclude Include="university-sis\modules\finance\paymentrepository.h" />
     <ClInclude Include="university-sis\modules\student\student.h" />
