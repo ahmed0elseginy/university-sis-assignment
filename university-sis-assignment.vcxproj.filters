@@ -15,91 +15,254 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="university-sis\main.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\mainwindow.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\database\databasemanager.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\academic\courserepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\academic\sectionrepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\attendance\attendancerepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\enrollment\enrollmentrepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\faculty\facultyrepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\finance\paymentrepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\modules\student\studentrepository.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\basesystemwidget.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\studentportal.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\academic\academicsystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\academic\coursedialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\academic\sectiondialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\attendance\attendancedialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\attendance\attendancesystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\enrollment\enrollmentdialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\enrollment\enrollmentsystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\faculty\facultydialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\faculty\facultysystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\finance\financesystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\finance\paymentdialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\login\logindialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\profile\profilewidget.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\student\studentdialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\facility\facilitysystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\facility\buildingdialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\facility\roomdialog.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\library\librarysystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\news\newssystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\calendar\calendarsystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\grades\gradessystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\ui\reports\reportssystem.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="university-sis\utils\thememanager.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="university-sis\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\database\databasemanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\academic\courserepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\academic\sectionrepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\attendance\attendancerepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\enrollment\enrollmentrepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\faculty\facultyrepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\finance\paymentrepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\student\studentrepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\basesystemwidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\studentportal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\academic\academicsystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\academic\coursedialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\academic\sectiondialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\attendance\attendancedialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\attendance\attendancesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\enrollment\enrollmentdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\enrollment\enrollmentsystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\faculty\facultydialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\faculty\facultysystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\finance\financesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\finance\paymentdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\login\logindialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\profile\profilewidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\student\studentdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\facility\facilitysystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\facility\buildingdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\facility\roomdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\library\librarysystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\news\newssystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\calendar\calendarsystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\grades\gradessystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\ui\reports\reportssystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\utils\thememanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="university-sis\modules\facility\facilityrepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="university-sis\mainwindow.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\basesystemwidget.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\studentportal.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\academic\academicsystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\academic\coursedialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\academic\sectiondialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\attendance\attendancedialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\attendance\attendancesystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\enrollment\enrollmentdialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\enrollment\enrollmentsystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\faculty\facultydialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\faculty\facultysystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\finance\financesystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\finance\paymentdialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\login\logindialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\profile\profilewidget.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\student\studentdialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\facility\facilitysystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\facility\buildingdialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\facility\roomdialog.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\library\librarysystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\news\newssystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\calendar\calendarsystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\grades\gradessystem.h"><Filter>Header Files</Filter></QtMoc>
-    <QtMoc Include="university-sis\ui\reports\reportssystem.h"><Filter>Header Files</Filter></QtMoc>
+    <QtMoc Include="university-sis\mainwindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\basesystemwidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\studentportal.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\academic\academicsystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\academic\coursedialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\academic\sectiondialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\attendance\attendancedialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\attendance\attendancesystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\enrollment\enrollmentdialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\enrollment\enrollmentsystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\faculty\facultydialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\faculty\facultysystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\finance\financesystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\finance\paymentdialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\login\logindialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\profile\profilewidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\student\studentdialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\facility\facilitysystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\facility\buildingdialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\facility\roomdialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\library\librarysystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\news\newssystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\calendar\calendarsystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\grades\gradessystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="university-sis\ui\reports\reportssystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="university-sis\database\databasemanager.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\academic\course.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\academic\courserepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\academic\section.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\academic\sectionrepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\attendance\attendance.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\attendance\attendancerepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\enrollment\enrollment.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\enrollment\enrollmentrepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\faculty\faculty.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\faculty\facultyrepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\facility\building.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\facility\room.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\facility\facilityrepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\finance\payment.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\finance\paymentrepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\student\student.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\modules\student\studentrepository.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="university-sis\utils\thememanager.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="university-sis\database\databasemanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\academic\course.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\academic\courserepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\academic\section.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\academic\sectionrepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\attendance\attendance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\attendance\attendancerepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\enrollment\enrollment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\enrollment\enrollmentrepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\faculty\faculty.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\faculty\facultyrepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\facility\building.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\facility\room.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\facility\facilityrepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\finance\payment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\finance\paymentrepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\student\student.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\modules\student\studentrepository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="university-sis\utils\thememanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="university-sis\resources.qrc"><Filter>Resource Files</Filter></QtRcc>
+    <QtRcc Include="university-sis\resources.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
   </ItemGroup>
 </Project>

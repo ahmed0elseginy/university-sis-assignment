@@ -1,5 +1,8 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="test" />
     <Platform Name="x64" />
   </Configurations>
   <Project Path="university-sis-assignment.vcxproj" Id="b87ebe8c-f18d-49a0-8e99-6899c49ba9fc" />
