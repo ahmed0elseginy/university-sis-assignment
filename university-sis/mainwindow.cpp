@@ -26,13 +26,31 @@
 #include <QPainterPath>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QApplication>
 
 #include <QGraphicsDropShadowEffect>
 
 // Modern Dashboard Widget with Statistics Cards
 class DashboardWidget : public QWidget {
 public:
-    explicit DashboardWidget(const QString& role, QWidget* parent = nullptr) : QWidget(parent) {
+    explicit DashboardWidget(const QString& role, QWidget* parent = nullptr) : QWidget(parent), m_role(role) {
+        setupDashboard();
+    }
+    
+    void refreshDashboard() {
+        // Clear existing widgets
+        QLayoutItem* item;
+        while ((item = layout()->takeAt(0)) != nullptr) {
+            if (item->widget()) {
+                item->widget()->deleteLater();
+            }
+            delete item;
+        }
+        setupDashboard();
+    }
+
+private:
+    void setupDashboard() {
         auto mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(40, 30, 40, 30);
         mainLayout->setSpacing(30);
@@ -52,12 +70,51 @@ public:
         titleLabel->setStyleSheet("font-size: 28px; font-weight: 600; color: #1D1D1F; background: transparent; margin-top: 4px;");
         headerVLayout->addWidget(titleLabel);
         
-        auto roleLabel = new QLabel(role);
+        auto roleLabel = new QLabel(m_role);
         roleLabel->setStyleSheet("font-size: 15px; color: #8E8E93; font-weight: 400; background: transparent; margin-top: 4px;");
         headerVLayout->addWidget(roleLabel);
         
         headerLayout->addWidget(headerWidget);
         headerLayout->addStretch();
+        
+        // Refresh Button - More Prominent
+        auto refreshBtn = new QPushButton(" Reload Data");
+        refreshBtn->setCursor(Qt::PointingHandCursor);
+        refreshBtn->setProperty("type", "primary");
+        refreshBtn->setFixedSize(140, 40);
+        refreshBtn->setToolTip("Click to refresh all dashboard statistics with latest data from database");
+        refreshBtn->setStyleSheet(
+            "QPushButton { "
+            "   background-color: #007AFF; "
+            "   color: white; "
+            "   border: none; "
+            "   border-radius: 8px; "
+            "   font-weight: 500; "
+            "   font-size: 13px; "
+            "   padding: 10px 20px; "
+            "}"
+            "QPushButton:hover { "
+            "   background-color: #0051D5; "
+            "}"
+            "QPushButton:pressed { "
+            "   background-color: #0040AA; "
+            "}"
+        );
+        connect(refreshBtn, &QPushButton::clicked, this, [this, refreshBtn]() {
+            // Disable button during refresh to prevent multiple clicks
+            refreshBtn->setEnabled(false);
+            refreshBtn->setText("⏳ Loading...");
+            QApplication::processEvents(); // Update UI immediately
+            
+            // Refresh dashboard
+            refreshDashboard();
+            
+            // Re-enable button after refresh
+            refreshBtn->setText("🔄 Reload Data");
+            refreshBtn->setEnabled(true);
+        });
+        headerLayout->addWidget(refreshBtn);
+        
         mainLayout->addLayout(headerLayout);
         
         // Statistics Cards Grid
@@ -165,6 +222,8 @@ public:
         mainLayout->addLayout(statsLayout);
         mainLayout->addStretch();
     }
+    
+    QString m_role;
 };
 
 MainWindow::MainWindow(QWidget *parent)
@@ -318,8 +377,8 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     m_contentArea = new QStackedWidget(this);
     
     // 0. Dashboard Page with Background
-    auto dashboardPage = new DashboardWidget(role, this);
-    m_contentArea->addWidget(dashboardPage);
+    m_dashboardWidget = new DashboardWidget(role, this);
+    m_contentArea->addWidget(m_dashboardWidget);
 
 
     
@@ -346,6 +405,12 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     
     auto studentPortal = new StudentPortal(this);
     studentPortal->setUserContext(role, userId);
+    // Connect student changes to dashboard refresh
+    connect(studentPortal, &StudentPortal::dataChanged, this, [this]() {
+        if (m_dashboardWidget) {
+            m_dashboardWidget->refreshDashboard();
+        }
+    });
     addModule(studentPortal, "Student Portal");
     addModule(new AcademicSystem(this), "Academic System");
     auto enrollmentSys = new EnrollmentSystem(this);
@@ -375,7 +440,8 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     }
     
     // News & Info
-    addModule(new NewsSystem(this), "News & Info");
+    auto newsSystem = new NewsSystem(this);
+    addModule(newsSystem, "News & Info");
 
     // Profile
     auto profileWidget = new ProfileWidget(username, role, this);
@@ -386,13 +452,21 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     mainLayout->addWidget(sidebarWidget);
     mainLayout->addWidget(m_contentArea);
 
-    connect(m_sidebar, &QListWidget::itemClicked, this, [this](QListWidgetItem* item){
+    connect(m_sidebar, &QListWidget::itemClicked, this, [this, newsSystem](QListWidgetItem* item){
         int index = item->data(Qt::UserRole).toInt();
         // If index is 0 but it's not the dashboard (dashboard has no user data set, so it defaults to 0), 
         // we need to be careful. Dashboard item wasn't processed by addModule.
         // Let's fix Dashboard logic:
         if (item->text().contains("Dashboard")) {
+             // Refresh dashboard when switching to it
+             if (m_dashboardWidget) {
+                 m_dashboardWidget->refreshDashboard();
+             }
              m_contentArea->setCurrentIndex(0);
+        } else if (item->text() == "News & Info") {
+             // Refresh news when switching to it to show latest calendar events
+             newsSystem->refreshNews();
+             m_contentArea->setCurrentIndex(index);
         } else if (index > 0) {
              m_contentArea->setCurrentIndex(index);
         }

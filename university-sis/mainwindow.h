@@ -25,5 +25,6 @@ private:
     QListWidget *m_sidebar;
     QStackedWidget *m_contentArea;
     class QPushButton* m_themeBtn; // Forward declaration
+    class DashboardWidget* m_dashboardWidget; // Forward declaration for dashboard
 };
 #endif // MAINWINDOW_H

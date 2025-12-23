@@ -218,6 +218,7 @@ void StudentPortal::onAddStudent()
         Student s = dialog.getStudent();
         if (m_repo.addStudent(s)) {
             refreshData();
+            emit dataChanged(); // Notify that data has changed
             QMessageBox::information(this, "Success", "Student added successfully.");
         } else {
             QMessageBox::critical(this, "Error", "Failed to add student.");
@@ -265,6 +266,7 @@ void StudentPortal::deleteStudent(int id)
     if (QMessageBox::Yes == QMessageBox::question(this, "Confirm Delete", "Are you sure you want to delete this student?")) {
         if (m_repo.deleteStudent(id)) {
             refreshData();
+            emit dataChanged(); // Notify that data has changed
         } else {
             QMessageBox::critical(this, "Error", "Failed to delete student.");
         }

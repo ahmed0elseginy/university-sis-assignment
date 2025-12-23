@@ -19,6 +19,9 @@ public:
     void setUserContext(const QString& role, int userId);       
     void refreshData();
 
+signals:
+    void dataChanged(); // Emitted when students are added/updated/deleted
+
 private slots:
     void onAddStudent();
     void onSearch(const QString &text);

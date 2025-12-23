@@ -190,7 +190,7 @@ void CalendarSystem::onAddEvent()
     
     if (query.exec()) {
         QMessageBox::information(this, "Success", 
-            QString("Event '%1' has been added successfully.").arg(m_titleEdit->text()));
+            QString("Event '%1' has been added successfully.\n\nIt will appear in the News & Info section.").arg(m_titleEdit->text()));
         m_titleEdit->clear();
         m_descriptionEdit->clear();
         m_typeCombo->setCurrentIndex(0);
