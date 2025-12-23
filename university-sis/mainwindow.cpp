@@ -432,7 +432,9 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     addModule(new FacilitySystem(this), "Facilities");
     
     // Library System
-    addModule(new LibrarySystem(this), "Library System");
+    auto librarySystem = new LibrarySystem(this);
+    librarySystem->setUserContext(role, userId);
+    addModule(librarySystem, "Library System");
     
     // Reports System
     if (isAdmin || isFaculty) {
