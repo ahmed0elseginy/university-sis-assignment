@@ -122,6 +122,9 @@
     <ClCompile Include="university-sis\ui\facility\roomdialog.cpp" />
     <ClCompile Include="university-sis\ui\library\librarysystem.cpp" />
     <ClCompile Include="university-sis\ui\news\newssystem.cpp" />
+    <ClCompile Include="university-sis\ui\calendar\calendarsystem.cpp" />
+    <ClCompile Include="university-sis\ui\grades\gradessystem.cpp" />
+    <ClCompile Include="university-sis\ui\reports\reportssystem.cpp" />
     <ClCompile Include="university-sis\utils\thememanager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +150,9 @@
     <QtMoc Include="university-sis\ui\facility\roomdialog.h" />
     <QtMoc Include="university-sis\ui\library\librarysystem.h" />
     <QtMoc Include="university-sis\ui\news\newssystem.h" />
+    <QtMoc Include="university-sis\ui\calendar\calendarsystem.h" />
+    <QtMoc Include="university-sis\ui\grades\gradessystem.h" />
+    <QtMoc Include="university-sis\ui\reports\reportssystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="university-sis\database\databasemanager.h" />

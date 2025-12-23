@@ -61,65 +61,64 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     auto containerLayout = new QVBoxLayout(bgWidget);
     containerLayout->setAlignment(Qt::AlignCenter);
 
-    // Liquid Glass Card
+    // macOS Style Card
     QFrame* card = new QFrame();
-    card->setFixedWidth(450);
+    card->setFixedWidth(420);
     card->setStyleSheet(
         "QFrame {"
-        "   background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, "
-        "       stop:0 rgba(255, 255, 255, 210), stop:1 rgba(255, 255, 255, 120));"
-        "   border: 1px solid rgba(255, 255, 255, 200);"
-        "   border-radius: 20px;"
-        "   border-bottom: 2px solid rgba(255, 255, 255, 100);"
-        "   border-right: 2px solid rgba(255, 255, 255, 100);"
+        "   background-color: rgba(255, 255, 255, 250);"
+        "   border: 0.5px solid rgba(209, 209, 214, 0.6);"
+        "   border-radius: 12px;"
         "}"
     );
 
-    // Deep Shadow for depth
+    // Subtle Shadow - macOS style
     QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(card);
-    shadow->setBlurRadius(50);
-    shadow->setColor(QColor(0, 0, 0, 80));
-    shadow->setOffset(0, 15);
+    shadow->setBlurRadius(20);
+    shadow->setColor(QColor(0, 0, 0, 25));
+    shadow->setOffset(0, 4);
     card->setGraphicsEffect(shadow);
     
     // Card Layout
     auto cardLayout = new QVBoxLayout(card);
-    cardLayout->setSpacing(25);
-    cardLayout->setContentsMargins(50, 60, 50, 60);
+    cardLayout->setSpacing(16);
+    cardLayout->setContentsMargins(40, 40, 40, 40);
 
-    // --- Header Section ---
+    // --- Header Section - macOS Style ---
     auto title = new QLabel("University Portal");
     title->setAlignment(Qt::AlignCenter);
-    // Modern Gradient Text effect is hard in Widgets, sticking to standard robust color
-    title->setStyleSheet("font-size: 36px; font-weight: 900; color: #2D3436; font-family: 'Segoe UI', sans-serif; background: transparent; border: none;");
+    title->setStyleSheet("font-size: 28px; font-weight: 600; color: #1D1D1F; font-family: -apple-system, 'SF Pro Display', sans-serif; background: transparent; border: none;");
     cardLayout->addWidget(title);
     
-    auto subTitle = new QLabel("Sign in to your dashboard");
+    auto subTitle = new QLabel("Sign in to continue");
     subTitle->setAlignment(Qt::AlignCenter);
-    subTitle->setStyleSheet("font-size: 16px; color: #636e72; margin-bottom: 10px; background: transparent; border: none; font-weight: 500;");
+    subTitle->setStyleSheet("font-size: 13px; color: #8E8E93; margin-bottom: 8px; margin-top: 4px; background: transparent; border: none; font-weight: 400;");
     cardLayout->addWidget(subTitle);
 
-    // --- styled inputs ---
+    // --- macOS styled inputs ---
     auto createInput = [](const QString& ph, bool isPass) -> QLineEdit* {
         QLineEdit* edit = new QLineEdit();
         edit->setPlaceholderText(ph);
         if (isPass) edit->setEchoMode(QLineEdit::Password);
         edit->setStyleSheet(
             "QLineEdit {"
-            "   padding: 14px 18px;"
-            "   background-color: rgba(255, 255, 255, 180);"
-            "   border: 1px solid rgba(255, 255, 255, 100);"
-            "   border-radius: 12px;"
-            "   font-size: 15px;"
-            "   color: #2d3436;"
-            "   selection-background-color: #0984e3;"
+            "   padding: 8px 12px;"
+            "   background-color: rgba(255, 255, 255, 240);"
+            "   border: 0.5px solid rgba(209, 209, 214, 0.8);"
+            "   border-radius: 6px;"
+            "   font-size: 13px;"
+            "   color: #1D1D1F;"
+            "   font-weight: 400;"
+            "   selection-background-color: #007AFF;"
+            "   selection-color: white;"
             "}"
             "QLineEdit:focus {"
             "   background-color: #ffffff;"
-            "   border: 2px solid #74b9ff;"
+            "   border: 0.5px solid #007AFF;"
             "}"
             "QLineEdit:hover {"
-            "   background-color: rgba(255, 255, 255, 230);"
+            "   background-color: rgba(255, 255, 255, 250);"
+            "   border-color: rgba(199, 199, 204, 0.8);"
             "}"
         );
         return edit;
@@ -131,46 +130,60 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     m_passEdit = createInput("Password", true);
     cardLayout->addWidget(m_passEdit);
 
-    // Role Selection
+    // Role Selection - macOS Style
     m_roleCombo = new QComboBox();
     m_roleCombo->addItems({"Administrator", "Student", "Faculty Member", "Finance Officer", "Registrar Officer"});
     m_roleCombo->setStyleSheet(
         "QComboBox {"
-        "   padding: 12px;"
-        "   background-color: rgba(255, 255, 255, 180);"
-        "   border: 1px solid rgba(255, 255, 255, 100);"
-        "   border-radius: 12px;"
-        "   font-size: 15px;"
-        "   color: #2d3436;"
+        "   padding: 8px 12px;"
+        "   background-color: rgba(255, 255, 255, 240);"
+        "   border: 0.5px solid rgba(209, 209, 214, 0.8);"
+        "   border-radius: 6px;"
+        "   font-size: 13px;"
+        "   color: #1D1D1F;"
+        "   font-weight: 400;"
         "}"
-        "QComboBox::drop-down { border: none; width: 30px; }"
-        "QComboBox::down-arrow { image: none; border-left: 2px solid #dfe6e9; width: 0; height: 0; border-top: 5px solid #636e72; border-right: 5px solid transparent; border-left: 5px solid transparent; margin-right: 10px; }" 
-        // Note: Custom Arrow styling in Qt StyleSheets is tricky without images, keeping simple or default
+        "QComboBox:hover {"
+        "   background-color: rgba(255, 255, 255, 250);"
+        "   border-color: rgba(199, 199, 204, 0.8);"
+        "}"
+        "QComboBox:focus {"
+        "   background-color: #ffffff;"
+        "   border: 0.5px solid #007AFF;"
+        "}"
+        "QComboBox::drop-down { border: none; width: 24px; }"
+        "QComboBox::down-arrow { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #8E8E93; }"
+        "QComboBox QAbstractItemView {"
+        "   background-color: #ffffff;"
+        "   border: 0.5px solid #D1D1D6;"
+        "   border-radius: 8px;"
+        "   selection-background-color: #007AFF;"
+        "   selection-color: white;"
+        "   padding: 4px;"
+        "}"
     );
     cardLayout->addWidget(m_roleCombo);
 
     cardLayout->addSpacing(10);
 
-    // Action Button
-    auto btn = new QPushButton("Login");
+    // Action Button - macOS Style
+    auto btn = new QPushButton("Sign In");
     btn->setCursor(Qt::PointingHandCursor);
-    btn->setFixedHeight(55);
-    // Gradient Button
+    btn->setFixedHeight(32);
     btn->setStyleSheet(
         "QPushButton { "
-        "   background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #0984e3, stop:1 #74b9ff);"
+        "   background-color: #007AFF;"
         "   color: white;"
         "   border: none;"
-        "   border-radius: 12px;"
-        "   font-size: 18px;"
-        "   font-weight: 800;"
-        "   letter-spacing: 1px;"
+        "   border-radius: 6px;"
+        "   font-size: 13px;"
+        "   font-weight: 400;"
         "}"
         "QPushButton:hover {"
-        "   background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #00cec9, stop:1 #81ecec);"
+        "   background-color: #0051D5;"
         "}"
         "QPushButton:pressed {"
-        "   background-color: #0984e3;"
+        "   background-color: #0040AA;"
         "}"
     );
 

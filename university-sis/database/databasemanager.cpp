@@ -196,6 +196,16 @@ void DatabaseManager::initSchema()
                "capacity INT, "
                "FOREIGN KEY (building_id) REFERENCES buildings(building_id) ON DELETE CASCADE)").arg(autoInc));
 
+    // Calendar Events Table
+    query.exec(QString("CREATE TABLE IF NOT EXISTS calendar_events ("
+               "id %1, "
+               "date DATE NOT NULL, "
+               "time TIME, "
+               "title VARCHAR(200) NOT NULL, "
+               "type VARCHAR(50), " // e.g., Class, Exam, Assignment Due, Meeting, Holiday, Other
+               "description TEXT, "
+               "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)").arg(autoInc));
+
      // Seed admin user if not exists
      QSqlQuery seed;
      // SQLite uses INSERT OR IGNORE, MySQL uses INSERT IGNORE.
@@ -204,4 +214,114 @@ void DatabaseManager::initSchema()
      if(!seed.exec()) {
          // Ignore error if already exists (constraint violation)
      }
+     
+     // Seed sample data
+     seedSampleData();
+}
+
+void DatabaseManager::seedSampleData()
+{
+    QSqlQuery query(m_db);
+    
+    // Check if data already exists
+    query.exec("SELECT COUNT(*) FROM students");
+    bool hasData = false;
+    if (query.next() && query.value(0).toInt() > 0) {
+        hasData = true;
+    }
+    
+    if (hasData) {
+        return; // Don't seed if data already exists
+    }
+    
+    // Seed Students
+    query.exec("INSERT INTO students (name, year, department, username, password) VALUES "
+               "('John Smith', 2, 'Computer Science', 'john.smith', 'pass123'), "
+               "('Emily Johnson', 3, 'Mathematics', 'emily.j', 'pass123'), "
+               "('Michael Brown', 1, 'Physics', 'michael.b', 'pass123'), "
+               "('Sarah Davis', 4, 'Computer Science', 'sarah.d', 'pass123'), "
+               "('David Wilson', 2, 'Engineering', 'david.w', 'pass123'), "
+               "('Jessica Martinez', 3, 'Biology', 'jessica.m', 'pass123'), "
+               "('Robert Taylor', 1, 'Chemistry', 'robert.t', 'pass123'), "
+               "('Amanda Anderson', 4, 'Mathematics', 'amanda.a', 'pass123')");
+    
+    // Seed Faculty
+    query.exec("INSERT INTO faculty (name, email, department, position, username, password) VALUES "
+               "('Dr. James Miller', 'james.miller@university.edu', 'Computer Science', 'Professor', 'james.m', 'pass123'), "
+               "('Dr. Patricia White', 'patricia.w@university.edu', 'Mathematics', 'Associate Professor', 'patricia.w', 'pass123'), "
+               "('Dr. Robert Harris', 'robert.h@university.edu', 'Physics', 'Professor', 'robert.h', 'pass123'), "
+               "('Dr. Linda Martin', 'linda.m@university.edu', 'Biology', 'Assistant Professor', 'linda.m', 'pass123'), "
+               "('Dr. William Thompson', 'william.t@university.edu', 'Engineering', 'Professor', 'william.t', 'pass123')");
+    
+    // Seed Courses
+    query.exec("INSERT INTO courses (name, year, hours) VALUES "
+               "('Introduction to Programming', 1, 3), "
+               "('Data Structures', 2, 4), "
+               "('Database Systems', 3, 3), "
+               "('Software Engineering', 4, 4), "
+               "('Calculus I', 1, 4), "
+               "('Linear Algebra', 2, 3), "
+               "('Physics I', 1, 4), "
+               "('Chemistry Fundamentals', 1, 3), "
+               "('Biology 101', 1, 3), "
+               "('Advanced Algorithms', 3, 4), "
+               "('Machine Learning', 4, 3), "
+               "('Computer Networks', 3, 3), "
+               "('Operating Systems', 3, 4), "
+               "('Web Development', 2, 3), "
+               "('Mobile App Development', 3, 3), "
+               "('Cybersecurity', 4, 3), "
+               "('Artificial Intelligence', 4, 4), "
+               "('Distributed Systems', 4, 3), "
+               "('Computer Graphics', 3, 3), "
+               "('Digital Signal Processing', 4, 3), "
+               "('Embedded Systems', 3, 4), "
+               "('Cloud Computing', 4, 3), "
+               "('Big Data Analytics', 4, 3), "
+               "('Quantum Computing', 4, 3)");
+    
+    // Seed Buildings
+    query.exec("INSERT INTO buildings (name, code, location) VALUES "
+               "('Science Building', 'SCI', 'North Campus'), "
+               "('Engineering Hall', 'ENG', 'East Campus'), "
+               "('Library Building', 'LIB', 'Central Campus'), "
+               "('Arts Center', 'ART', 'South Campus'), "
+               "('Student Center', 'STU', 'Central Campus'), "
+               "('Computer Science Building', 'CS', 'North Campus'), "
+               "('Mathematics Building', 'MATH', 'East Campus'), "
+               "('Biology Lab', 'BIO', 'North Campus'), "
+               "('Chemistry Lab', 'CHEM', 'North Campus'), "
+               "('Physics Lab', 'PHYS', 'North Campus'), "
+               "('Engineering Lab', 'ENGLAB', 'East Campus'), "
+               "('Research Center', 'RES', 'South Campus')");
+    
+    // Seed Rooms
+    query.exec("INSERT INTO rooms (building_id, room_number, type, capacity) VALUES "
+               "(1, '101', 'Lecture Hall', 100), (1, '102', 'Lecture Hall', 80), (1, '201', 'Lab', 30), "
+               "(2, '101', 'Lecture Hall', 120), (2, '202', 'Lab', 25), (2, '301', 'Lecture Hall', 90), "
+               "(3, '101', 'Study Room', 20), (3, '201', 'Reading Room', 50), (3, '301', 'Conference Room', 15), "
+               "(4, '101', 'Studio', 25), (4, '201', 'Workshop', 30), "
+               "(5, '101', 'Meeting Room', 50), (5, '201', 'Event Hall', 200), "
+               "(6, '101', 'Computer Lab', 40), (6, '201', 'Lecture Hall', 100), "
+               "(7, '101', 'Lecture Hall', 80), (7, '201', 'Seminar Room', 30), "
+               "(8, '101', 'Lab', 20), (8, '201', 'Lab', 20), "
+               "(9, '101', 'Lab', 25), (9, '201', 'Lab', 25), "
+               "(10, '101', 'Lab', 30), (10, '201', 'Lab', 30), "
+               "(11, '101', 'Workshop', 35), (11, '201', 'Lab', 30), "
+               "(12, '101', 'Conference Room', 20), (12, '201', 'Research Lab', 15)");
+    
+    // Seed Payments (sample revenue data)
+    query.exec("INSERT INTO payments (student_id, amount, description, status, date) VALUES "
+               "(1, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-01'), "
+               "(2, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-01'), "
+               "(3, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-02'), "
+               "(4, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-02'), "
+               "(5, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-03'), "
+               "(6, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-03'), "
+               "(7, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-04'), "
+               "(8, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-04'), "
+               "(1, 500.00, 'Lab Fee', 'Paid', '2024-09-15'), "
+               "(2, 500.00, 'Lab Fee', 'Paid', '2024-09-15'), "
+               "(3, 500.00, 'Lab Fee', 'Paid', '2024-09-16'), "
+               "(4, 500.00, 'Lab Fee', 'Paid', '2024-09-16')");
 }

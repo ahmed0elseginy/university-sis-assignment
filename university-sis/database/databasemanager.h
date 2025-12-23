@@ -15,6 +15,7 @@ public:
     bool isOpen() const;
     QSqlDatabase getDatabase() const;
     void initSchema(); // Helper to create tables if they don't exist
+    void seedSampleData(); // Seed database with sample data
 
 private:
     DatabaseManager();

@@ -107,6 +107,18 @@ set(PROJECT_SOURCES
         modules/facility/facilityrepository.h
         modules/facility/facilityrepository.cpp
 
+        # Calendar System
+        ui/calendar/calendarsystem.h
+        ui/calendar/calendarsystem.cpp
+
+        # Grades System
+        ui/grades/gradessystem.h
+        ui/grades/gradessystem.cpp
+
+        # Reports System
+        ui/reports/reportssystem.h
+        ui/reports/reportssystem.cpp
+
         ${TS_FILES}
 )
 

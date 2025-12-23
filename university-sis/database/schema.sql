@@ -61,3 +61,38 @@ CREATE TABLE IF NOT EXISTS rooms (
     capacity INT,
     FOREIGN KEY (building_id) REFERENCES buildings(building_id) ON DELETE CASCADE
 );
+
+-- Calendar Events
+CREATE TABLE IF NOT EXISTS calendar_events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    time TIME,
+    title VARCHAR(200) NOT NULL,
+    type VARCHAR(50),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Grades
+CREATE TABLE IF NOT EXISTS grades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    enrollment_id INT,
+    assignment_type VARCHAR(50),
+    assignment_name VARCHAR(200),
+    score DECIMAL(5,2),
+    max_score DECIMAL(5,2),
+    grade_date DATE,
+    FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE
+);
+
+-- Course Schedule
+CREATE TABLE IF NOT EXISTS course_schedule (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    course_id INT,
+    day_of_week INT,
+    start_time TIME,
+    end_time TIME,
+    room_id INT,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE SET NULL
+);

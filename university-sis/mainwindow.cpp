@@ -11,80 +11,159 @@
 #include "ui/profile/profilewidget.h"
 #include "ui/library/librarysystem.h"
 #include "ui/news/newssystem.h"
+#include "ui/calendar/calendarsystem.h"
+#include "ui/grades/gradessystem.h"
+#include "ui/reports/reportssystem.h"
 #include "utils/thememanager.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QStatusBar>
 #include <QPushButton>
 #include <QTimer>
 #include <QPainter>
 #include <QPainterPath>
+#include <QSqlQuery>
+#include <QSqlError>
 
 #include <QGraphicsDropShadowEffect>
 
-// Custom Dashboard Widget with Background
+// Modern Dashboard Widget with Statistics Cards
 class DashboardWidget : public QWidget {
 public:
     explicit DashboardWidget(const QString& role, QWidget* parent = nullptr) : QWidget(parent) {
-        auto layout = new QVBoxLayout(this);
-        layout->setAlignment(Qt::AlignCenter);
+        auto mainLayout = new QVBoxLayout(this);
+        mainLayout->setContentsMargins(40, 30, 40, 30);
+        mainLayout->setSpacing(30);
         
-        // Liquid Glass Card
-        auto card = new QWidget();
-        card->setFixedWidth(550);
-        card->setStyleSheet(
-        "QWidget {"
-        "   background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, "
-        "       stop:0 rgba(255, 255, 255, 220), stop:1 rgba(255, 255, 255, 150));"
-        "   border: 1px solid rgba(255, 255, 255, 200);"
-        "   border-radius: 20px;"
-        "   border-bottom: 2px solid rgba(255, 255, 255, 100);"
-        "   border-right: 2px solid rgba(255, 255, 255, 100);"
-        "}"
-        );
+        // Header Section
+        auto headerLayout = new QHBoxLayout();
+        auto headerWidget = new QWidget();
+        headerWidget->setStyleSheet("background: transparent;");
+        auto headerVLayout = new QVBoxLayout(headerWidget);
+        headerVLayout->setContentsMargins(0, 0, 0, 0);
         
-        // Deep Shadow
-        QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(card);
-        shadow->setBlurRadius(50);
-        shadow->setColor(QColor(0, 0, 0, 80));
-        shadow->setOffset(0, 15);
-        card->setGraphicsEffect(shadow);
-
-        auto cardLayout = new QVBoxLayout(card);
-        cardLayout->setSpacing(15);
-        cardLayout->setContentsMargins(40, 50, 40, 50);
+        auto welcomeLabel = new QLabel("Welcome back");
+        welcomeLabel->setStyleSheet("font-size: 13px; color: #8E8E93; font-weight: 400; background: transparent;");
+        headerVLayout->addWidget(welcomeLabel);
         
-        auto title = new QLabel("University Management System");
-        title->setAlignment(Qt::AlignCenter);
-        title->setStyleSheet("font-size: 32px; font-weight: 900; color: #2D3436; font-family: 'Segoe UI', sans-serif; background: transparent; border: none;");
+        auto titleLabel = new QLabel("University Management");
+        titleLabel->setStyleSheet("font-size: 28px; font-weight: 600; color: #1D1D1F; background: transparent; margin-top: 4px;");
+        headerVLayout->addWidget(titleLabel);
         
-        auto subtitle = new QLabel("Welcome, " + role);
-        subtitle->setAlignment(Qt::AlignCenter);
-        subtitle->setStyleSheet("font-size: 20px; color: #0984e3; background: transparent; border: none; font-weight: 600; margin-bottom: 10px;");
+        auto roleLabel = new QLabel(role);
+        roleLabel->setStyleSheet("font-size: 15px; color: #8E8E93; font-weight: 400; background: transparent; margin-top: 4px;");
+        headerVLayout->addWidget(roleLabel);
         
-        auto niceText = new QLabel("Select a module from the sidebar to begin.");
-        niceText->setAlignment(Qt::AlignCenter);
-        niceText->setStyleSheet("font-size: 15px; color: #636e72; background: transparent; border: none;");
+        headerLayout->addWidget(headerWidget);
+        headerLayout->addStretch();
+        mainLayout->addLayout(headerLayout);
         
-        cardLayout->addWidget(title);
-        cardLayout->addWidget(subtitle);
-        cardLayout->addWidget(niceText);
+        // Statistics Cards Grid
+        auto statsLayout = new QGridLayout();
+        statsLayout->setSpacing(20);
         
-        layout->addWidget(card);
-    }
-    
-protected:
-    void paintEvent(QPaintEvent*) override {
-        QPainter p(this);
-        QPixmap bg(":/resources/images/login_bg.jpg");
-        if (!bg.isNull()) {
-            p.drawPixmap(rect(), bg.scaled(size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
-        } else {
-            p.fillRect(rect(), QColor("#ecf0f1"));
+        // Create stat cards - macOS style
+        auto createStatCard = [](const QString& title, const QString& value) -> QWidget* {
+            auto card = new QWidget();
+            card->setStyleSheet(
+                "QWidget {"
+                "   background-color: #FFFFFF;"
+                "   border: 0.5px solid #D1D1D6;"
+                "   border-radius: 10px;"
+                "}"
+            );
+            
+            QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(card);
+            shadow->setBlurRadius(10);
+            shadow->setColor(QColor(0, 0, 0, 8));
+            shadow->setOffset(0, 2);
+            card->setGraphicsEffect(shadow);
+            
+            auto cardLayout = new QVBoxLayout(card);
+            cardLayout->setContentsMargins(20, 18, 20, 18);
+            cardLayout->setSpacing(8);
+            
+            auto valueLabel = new QLabel(value);
+            valueLabel->setStyleSheet("font-size: 32px; font-weight: 600; color: #1D1D1F; background: transparent;");
+            cardLayout->addWidget(valueLabel);
+            
+            auto titleLabel = new QLabel(title);
+            titleLabel->setStyleSheet("font-size: 13px; color: #8E8E93; font-weight: 400; background: transparent;");
+            cardLayout->addWidget(titleLabel);
+            
+            cardLayout->addStretch();
+            return card;
+        };
+        
+        // Query real data from database
+        QSqlQuery query(DatabaseManager::instance().getDatabase());
+        
+        // Total Courses
+        int totalCourses = 0;
+        if (query.exec("SELECT COUNT(*) FROM courses")) {
+            if (query.next()) {
+                totalCourses = query.value(0).toInt();
+            }
         }
-        // Dark overlay with slight tint
-        p.fillRect(rect(), QColor(10, 20, 40, 80));
+        
+        // Total Students
+        int totalStudents = 0;
+        if (query.exec("SELECT COUNT(*) FROM students")) {
+            if (query.next()) {
+                totalStudents = query.value(0).toInt();
+            }
+        }
+        
+        // Total Faculty
+        int totalFaculty = 0;
+        if (query.exec("SELECT COUNT(*) FROM faculty")) {
+            if (query.next()) {
+                totalFaculty = query.value(0).toInt();
+            }
+        }
+        
+        // Total Buildings/Facilities
+        int totalFacilities = 0;
+        if (query.exec("SELECT COUNT(*) FROM buildings")) {
+            if (query.next()) {
+                totalFacilities = query.value(0).toInt();
+            }
+        }
+        
+        // Total Revenue (sum of payments)
+        double totalRevenue = 0.0;
+        if (query.exec("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'Paid'")) {
+            if (query.next()) {
+                totalRevenue = query.value(0).toDouble();
+            }
+        }
+        
+        // Format numbers
+        QString coursesStr = QString::number(totalCourses);
+        QString studentsStr = totalStudents >= 1000 ? 
+            QString::number(totalStudents / 1000.0, 'f', 1) + "K" : 
+            QString::number(totalStudents);
+        QString facultyStr = QString::number(totalFaculty);
+        QString facilitiesStr = QString::number(totalFacilities);
+        QString revenueStr = totalRevenue >= 1000000 ? 
+            "$" + QString::number(totalRevenue / 1000000.0, 'f', 1) + "M" :
+            "$" + QString::number(totalRevenue / 1000.0, 'f', 0) + "K";
+        
+        // Library Books (placeholder - would need library table)
+        QString libraryStr = "N/A";
+        
+        // Add stat cards with real data
+        statsLayout->addWidget(createStatCard("Total Courses", coursesStr), 0, 0);
+        statsLayout->addWidget(createStatCard("Students", studentsStr), 0, 1);
+        statsLayout->addWidget(createStatCard("Faculty", facultyStr), 0, 2);
+        statsLayout->addWidget(createStatCard("Library Books", libraryStr), 1, 0);
+        statsLayout->addWidget(createStatCard("Facilities", facilitiesStr), 1, 1);
+        statsLayout->addWidget(createStatCard("Revenue", revenueStr), 1, 2);
+        
+        mainLayout->addLayout(statsLayout);
+        mainLayout->addStretch();
     }
 };
 
@@ -139,7 +218,7 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
 
     // Sidebar Container to hold list and bottom buttons
     auto sidebarWidget = new QWidget(this);
-    sidebarWidget->setFixedWidth(260); // Slightly wider for macOS look
+    sidebarWidget->setFixedWidth(240); // macOS-style sidebar width
     auto sidebarLayout = new QVBoxLayout(sidebarWidget);
     sidebarLayout->setContentsMargins(0, 0, 0, 0);
     sidebarLayout->setSpacing(0);
@@ -148,9 +227,9 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     m_sidebar = new QListWidget(this);
     // Styles are now handled by ThemeManager
     
-    // BUILD MENU BASED ON ROLE
+    // BUILD MENU BASED ON ROLE - Clean text-based icons
     // Common Dashboard
-    new QListWidgetItem("📊 Dashboard", m_sidebar);
+    new QListWidgetItem("Dashboard", m_sidebar);
     
     bool isAdmin = (role == "Administrator");
     bool isStudent = (role == "Student");
@@ -159,56 +238,79 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     
     // 1. Student Portal (Available to Admin, Student, Faculty)
     if (isAdmin || isStudent || isFaculty) {
-        new QListWidgetItem("🎓 Student Portal", m_sidebar);
+        new QListWidgetItem("Student Portal", m_sidebar);
     }
     
     // 2. Academic System (Admin, Faculty)
     if (isAdmin || isFaculty) {
-        new QListWidgetItem("📚 Academic System", m_sidebar);
+        new QListWidgetItem("Academic System", m_sidebar);
     }
     
     // 3. Enrollment (Admin, Student)
     if (isAdmin || isStudent) {
-        new QListWidgetItem("📝 Enrollment", m_sidebar);
+        new QListWidgetItem("Enrollment", m_sidebar);
     }
     
     // 4. Attendance (Admin, Faculty, Student(ViewOnly))
-    new QListWidgetItem("📅 Attendance", m_sidebar);
+    new QListWidgetItem("Attendance", m_sidebar);
     
-    // 5. Finance (Admin, Finance, Student)
+    // 5. Calendar & Schedule (All)
+    new QListWidgetItem("Calendar", m_sidebar);
+    
+    // 6. Grades & Transcripts (All)
+    new QListWidgetItem("Grades", m_sidebar);
+    
+    // 7. Finance (Admin, Finance, Student)
     if (isAdmin || isFinance || isStudent) {
-        new QListWidgetItem("💰 Payment & Finance", m_sidebar);
+        new QListWidgetItem("Payment & Finance", m_sidebar);
     }
     
-    // 6. Faculty System (Admin, Faculty)
+    // 8. Faculty System (Admin, Faculty)
     if (isAdmin || isFaculty) {
-        new QListWidgetItem("👨‍🏫 Faculty & Staff", m_sidebar);
+        new QListWidgetItem("Faculty & Staff", m_sidebar);
     }
     
-    // Facility System (Admin, Faculty)
+    // 9. Facility System (Admin, Faculty)
     if (isAdmin || isFaculty) {
-        new QListWidgetItem("🏢 Facilities", m_sidebar);
+        new QListWidgetItem("Facilities", m_sidebar);
     }
     
-    // 7. Library (All)
-    new QListWidgetItem("📖 Library System", m_sidebar);
+    // 10. Library (All)
+    new QListWidgetItem("Library System", m_sidebar);
     
-    // 8. News (All)
-    new QListWidgetItem("📰 News & Info", m_sidebar);
+    // 11. Reports & Analytics (Admin, Faculty)
+    if (isAdmin || isFaculty) {
+        new QListWidgetItem("Reports", m_sidebar);
+    }
     
-
-
-    // 9. Profile (Bottom)
-    auto profileItem = new QListWidgetItem("👤 My Profile", m_sidebar);
+    // 12. News (All)
+    new QListWidgetItem("News & Info", m_sidebar);
+    
+    // 13. Profile (Bottom)
+    auto profileItem = new QListWidgetItem("My Profile", m_sidebar);
     
     sidebarLayout->addWidget(m_sidebar);
     
-    // Theme Toggle Button at bottom of sidebar
-    m_themeBtn = new QPushButton("🌙 Toggle Theme", this);
+    // Theme Toggle Button at bottom of sidebar - macOS style
+    m_themeBtn = new QPushButton("Dark Mode", this);
     m_themeBtn->setCursor(Qt::PointingHandCursor);
-    m_themeBtn->setFixedHeight(48);
-    m_themeBtn->setStyleSheet("QPushButton { border: none; border-top: 1px solid #D1D1D6; border-radius: 0px; text-align: left; padding-left: 20px; font-weight: bold; background-color: transparent; }"
-                              "QPushButton:hover { background-color: rgba(0,0,0,0.05); }");
+    m_themeBtn->setFixedHeight(44);
+    m_themeBtn->setStyleSheet(
+        "QPushButton { "
+        "   border: none; "
+        "   border-top: 0.5px solid rgba(0, 0, 0, 0.1); "
+        "   border-radius: 0px; "
+        "   text-align: left; "
+        "   padding-left: 16px; "
+        "   font-weight: 400; "
+        "   font-size: 13px; "
+        "   color: #1D1D1F; "
+        "   background-color: transparent; "
+        "}"
+        "QPushButton:hover { "
+        "   background-color: rgba(0, 0, 0, 0.04); "
+        "}"
+    );
     
     sidebarLayout->addWidget(m_themeBtn);
 
@@ -251,12 +353,26 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     addModule(enrollmentSys, "Enrollment");
 
     addModule(new AttendanceSystem(this), "Attendance");
+    
+    // Calendar System
+    addModule(new CalendarSystem(this), "Calendar");
+    
+    // Grades System
+    auto gradesSys = new GradesSystem(this);
+    gradesSys->setUserContext(role, userId);
+    addModule(gradesSys, "Grades");
+    
     addModule(new FinanceSystem(this), "Payment");
     addModule(new FacultySystem(this), "Faculty");
     addModule(new FacilitySystem(this), "Facilities");
     
     // Library System
     addModule(new LibrarySystem(this), "Library System");
+    
+    // Reports System
+    if (isAdmin || isFaculty) {
+        addModule(new ReportsSystem(this), "Reports");
+    }
     
     // News & Info
     addModule(new NewsSystem(this), "News & Info");
