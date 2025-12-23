@@ -2,63 +2,14 @@
 #define STUDENTPORTAL_H
 
 #include <QWidget>
-#include <QScrollArea>
+#include <QTableView>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QGridLayout>
 #include <QLabel>
-#include <QPushButton>
-#include <QTableWidget>
-#include <QGroupBox>
-#include <QProgressBar>
-#include <QDate>
+#include <QLineEdit>
+#include <QStandardItemModel>
 #include "../modules/student/studentrepository.h"
-#include "../database/databasemanager.h"
-#include <QSqlQuery>
-
-// Forward declarations
-struct StudentInfo {
-    int id;
-    QString name;
-    int year;
-    QString department;
-    int sectionId;
-    QString username;
-};
-
-struct CourseInfo {
-    int courseId;
-    QString courseName;
-    int sectionId;
-    int hours;
-    QString grade;
-};
-
-struct GradeInfo {
-    int courseId;
-    QString courseName;
-    QString a1;
-    QString a2;
-    QString finalExam;
-    QString total;
-};
-
-struct AttendanceInfo {
-    int courseId;
-    QString courseName;
-    int present;
-    int absent;
-    int late;
-    double attendanceRate;
-};
-
-struct PaymentInfo {
-    int paymentId;
-    double amount;
-    QString description;
-    QString status;
-    QDate date;
-};
 
 class StudentPortal : public QWidget
 {
@@ -69,54 +20,33 @@ public:
     void refreshData();
 
 signals:
-    void dataChanged();
+    void dataChanged(); // Emitted when students are added/updated/deleted
 
 private slots:
-    void onRefresh();
+    void onAddStudent();
+    void onSearch(const QString &text);
 
 private:
     void setupUi();
-    void loadStudentData();
-    void createProfileCard();
-    void createCoursesCard();
-    void createGradesCard();
-    void createAttendanceCard();
-    void createFinancialCard();
-    void createQuickStatsCard();
-    QWidget* createUpcomingEventsCard();
+    void loadStudents();
     
-    // Data fetching methods
-    StudentInfo getStudentInfo();
-    QList<CourseInfo> getStudentCourses();
-    QList<GradeInfo> getStudentGrades();
-    QList<AttendanceInfo> getStudentAttendance();
-    QList<PaymentInfo> getStudentPayments();
-    double calculateGPA();
-    int getUpcomingEventsCount();
-    
-    // UI Helpers
-    QWidget* createCard(const QString& title, QWidget* content);
-    QWidget* createStatLabel(const QString& label, const QString& value, const QString& color = "#007AFF");
-    void applyCardStyle(QWidget* card);
+    // Actions
+    void viewStudent(int id);
+    void editStudent(int id);
+    void deleteStudent(int id);
 
-    QScrollArea *m_scrollArea;
-    QWidget *m_contentWidget;
-    QVBoxLayout *m_mainLayout;
+    // UI Helpers
+    void styleTable();
+
+    QTableView *m_view;
+    QStandardItemModel *m_model;
     StudentRepository m_repo;
     
+    QPushButton *m_btnAdd;
+    QLineEdit *m_searchBar;
+
     QString m_currentUserRole;
     int m_currentUserId = -1;
-    
-    // UI Components
-    QLabel *m_profileName;
-    QLabel *m_profileId;
-    QLabel *m_profileDept;
-    QLabel *m_profileYear;
-    QLabel *m_gpaLabel;
-    QTableWidget *m_coursesTable;
-    QTableWidget *m_gradesTable;
-    QTableWidget *m_attendanceTable;
-    QTableWidget *m_paymentsTable;
 };
 
 #endif // STUDENTPORTAL_H

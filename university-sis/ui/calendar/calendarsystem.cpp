@@ -10,23 +10,9 @@
 
 CalendarSystem::CalendarSystem(QWidget *parent)
     : BaseSystemWidget("Calendar & Schedule", parent)
-    , m_currentUserRole("")
-    , m_currentUserId(-1)
 {
     setupUi();
     refreshEvents();
-}
-
-void CalendarSystem::setUserContext(const QString& role, int userId)
-{
-    m_currentUserRole = role;
-    m_currentUserId = userId;
-    
-    // Hide add/delete form for students (view-only)
-    bool isStudent = (role == "Student");
-    if (m_formGroup) {
-        m_formGroup->setVisible(!isStudent);
-    }
 }
 
 void CalendarSystem::setupUi()
@@ -84,8 +70,8 @@ void CalendarSystem::setupUi()
     rightLayout->addWidget(eventsGroup, 2);
     
     // Add Event Form
-    m_formGroup = new QGroupBox("Add New Event");
-    auto formLayout = new QVBoxLayout(m_formGroup);
+    auto formGroup = new QGroupBox("Add New Event");
+    auto formLayout = new QVBoxLayout(formGroup);
     formLayout->setSpacing(10);
     
     auto dateLayout = new QHBoxLayout();
@@ -130,7 +116,7 @@ void CalendarSystem::setupUi()
     buttonLayout->addStretch();
     formLayout->addLayout(buttonLayout);
     
-    rightLayout->addWidget(m_formGroup, 1);
+    rightLayout->addWidget(formGroup, 1);
     
     contentLayout->addLayout(rightLayout, 1);
     
