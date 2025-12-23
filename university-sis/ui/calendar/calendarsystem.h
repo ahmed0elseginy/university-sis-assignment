@@ -22,6 +22,7 @@ class CalendarSystem : public BaseSystemWidget
 
 public:
     explicit CalendarSystem(QWidget *parent = nullptr);
+    void setUserContext(const QString& role, int userId);
 
 private slots:
     void onCalendarSelectionChanged();
@@ -46,6 +47,9 @@ private:
     QPushButton *m_addBtn;
     QPushButton *m_deleteBtn;
     QLabel *m_selectedDateLabel;
+    QGroupBox *m_formGroup;
+    QString m_currentUserRole;
+    int m_currentUserId;
 };
 
 #endif // CALENDARSYSTEM_H

@@ -287,15 +287,18 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     // Styles are now handled by ThemeManager
     
     // BUILD MENU BASED ON ROLE - Clean text-based icons
-    // Common Dashboard
-    new QListWidgetItem("Dashboard", m_sidebar);
-    
     bool isAdmin = (role == "Administrator");
     bool isStudent = (role == "Student");
     bool isFaculty = (role == "Faculty Member");
     bool isFinance = (role == "Finance Officer");
     
+    // Dashboard - NOT available to Students (they only see their portal)
+    if (!isStudent) {
+        new QListWidgetItem("Dashboard", m_sidebar);
+    }
+    
     // 1. Student Portal (Available to Admin, Student, Faculty)
+    // For Students, this is their main view (no dashboard)
     if (isAdmin || isStudent || isFaculty) {
         new QListWidgetItem("Student Portal", m_sidebar);
     }
@@ -305,22 +308,26 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
         new QListWidgetItem("Academic System", m_sidebar);
     }
     
-    // 3. Enrollment (Admin, Student)
-    if (isAdmin || isStudent) {
+    // 3. Enrollment (Admin only - students enroll through portal)
+    if (isAdmin) {
         new QListWidgetItem("Enrollment", m_sidebar);
     }
     
-    // 4. Attendance (Admin, Faculty, Student(ViewOnly))
-    new QListWidgetItem("Attendance", m_sidebar);
+    // 4. Attendance (Admin, Faculty only - students view in portal)
+    if (isAdmin || isFaculty) {
+        new QListWidgetItem("Attendance", m_sidebar);
+    }
     
     // 5. Calendar & Schedule (All)
     new QListWidgetItem("Calendar", m_sidebar);
     
-    // 6. Grades & Transcripts (All)
-    new QListWidgetItem("Grades", m_sidebar);
+    // 6. Grades & Transcripts (Admin, Faculty - students view in portal)
+    if (isAdmin || isFaculty) {
+        new QListWidgetItem("Grades", m_sidebar);
+    }
     
-    // 7. Finance (Admin, Finance, Student)
-    if (isAdmin || isFinance || isStudent) {
+    // 7. Finance (Admin, Finance - students view in portal)
+    if (isAdmin || isFinance) {
         new QListWidgetItem("Payment & Finance", m_sidebar);
     }
     
@@ -334,10 +341,10 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
         new QListWidgetItem("Facilities", m_sidebar);
     }
     
-    // 10. Library (All)
+    // 10. Library (All - students can view their loans in portal)
     new QListWidgetItem("Library System", m_sidebar);
     
-    // 11. Reports & Analytics (Admin, Faculty)
+    // 11. Reports & Analytics (Admin, Faculty only)
     if (isAdmin || isFaculty) {
         new QListWidgetItem("Reports", m_sidebar);
     }
@@ -376,9 +383,14 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     // Content Area
     m_contentArea = new QStackedWidget(this);
     
-    // 0. Dashboard Page with Background
-    m_dashboardWidget = new DashboardWidget(role, this);
-    m_contentArea->addWidget(m_dashboardWidget);
+    // 0. Dashboard Page with Background (NOT for students)
+    if (!isStudent) {
+        m_dashboardWidget = new DashboardWidget(role, this);
+        m_contentArea->addWidget(m_dashboardWidget);
+    } else {
+        // For students, start with Student Portal instead
+        m_dashboardWidget = nullptr;
+    }
 
 
     
@@ -403,6 +415,8 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
         }
     };
     
+    // For students, Student Portal is at index 0 (no dashboard)
+    // For others, Dashboard is at index 0, Student Portal at index 1
     auto studentPortal = new StudentPortal(this);
     studentPortal->setUserContext(role, userId);
     // Connect student changes to dashboard refresh
@@ -412,31 +426,57 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
         }
     });
     addModule(studentPortal, "Student Portal");
-    addModule(new AcademicSystem(this), "Academic System");
-    auto enrollmentSys = new EnrollmentSystem(this);
-    enrollmentSys->setUserContext(role, userId);
-    addModule(enrollmentSys, "Enrollment");
+    
+    // Academic System (Admin, Faculty only)
+    if (isAdmin || isFaculty) {
+        addModule(new AcademicSystem(this), "Academic System");
+    }
+    
+    // Enrollment (Admin only - students manage through portal)
+    if (isAdmin) {
+        auto enrollmentSys = new EnrollmentSystem(this);
+        enrollmentSys->setUserContext(role, userId);
+        addModule(enrollmentSys, "Enrollment");
+    }
 
-    addModule(new AttendanceSystem(this), "Attendance");
+    // Attendance (Admin, Faculty only - students view in portal)
+    if (isAdmin || isFaculty) {
+        addModule(new AttendanceSystem(this), "Attendance");
+    }
     
-    // Calendar System
-    addModule(new CalendarSystem(this), "Calendar");
+    // Calendar System (All - but students have view-only)
+    auto calendarSystem = new CalendarSystem(this);
+    calendarSystem->setUserContext(role, userId);
+    addModule(calendarSystem, "Calendar");
     
-    // Grades System
-    auto gradesSys = new GradesSystem(this);
-    gradesSys->setUserContext(role, userId);
-    addModule(gradesSys, "Grades");
+    // Grades System (Admin, Faculty only - students view in portal)
+    if (isAdmin || isFaculty) {
+        auto gradesSys = new GradesSystem(this);
+        gradesSys->setUserContext(role, userId);
+        addModule(gradesSys, "Grades");
+    }
     
-    addModule(new FinanceSystem(this), "Payment");
-    addModule(new FacultySystem(this), "Faculty");
-    addModule(new FacilitySystem(this), "Facilities");
+    // Finance (Admin, Finance only - students view in portal)
+    if (isAdmin || isFinance) {
+        addModule(new FinanceSystem(this), "Payment");
+    }
     
-    // Library System
+    // Faculty System (Admin, Faculty only)
+    if (isAdmin || isFaculty) {
+        addModule(new FacultySystem(this), "Faculty");
+    }
+    
+    // Facilities (Admin, Faculty only)
+    if (isAdmin || isFaculty) {
+        addModule(new FacilitySystem(this), "Facilities");
+    }
+    
+    // Library System (All - but students have limited access)
     auto librarySystem = new LibrarySystem(this);
     librarySystem->setUserContext(role, userId);
     addModule(librarySystem, "Library System");
     
-    // Reports System
+    // Reports System (Admin, Faculty only)
     if (isAdmin || isFaculty) {
         addModule(new ReportsSystem(this), "Reports");
     }
@@ -454,12 +494,10 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
     mainLayout->addWidget(sidebarWidget);
     mainLayout->addWidget(m_contentArea);
 
-    connect(m_sidebar, &QListWidget::itemClicked, this, [this, newsSystem](QListWidgetItem* item){
+    connect(m_sidebar, &QListWidget::itemClicked, this, [this, newsSystem, isStudent](QListWidgetItem* item){
         int index = item->data(Qt::UserRole).toInt();
-        // If index is 0 but it's not the dashboard (dashboard has no user data set, so it defaults to 0), 
-        // we need to be careful. Dashboard item wasn't processed by addModule.
-        // Let's fix Dashboard logic:
-        if (item->text().contains("Dashboard")) {
+        // Dashboard logic (only if not student)
+        if (item->text().contains("Dashboard") && !isStudent) {
              // Refresh dashboard when switching to it
              if (m_dashboardWidget) {
                  m_dashboardWidget->refreshDashboard();
@@ -476,8 +514,19 @@ void MainWindow::setupUi(const QString& username, const QString& role, int userI
 
     connect(m_themeBtn, &QPushButton::clicked, this, &MainWindow::onToggleTheme);
     
-    // Set default
-    m_sidebar->setCurrentRow(0);
+    // Set default - Students start at Student Portal, others at Dashboard
+    if (isStudent) {
+        // Find Student Portal item and set it as current
+        auto items = m_sidebar->findItems("Student Portal", Qt::MatchExactly);
+        if (!items.isEmpty()) {
+            m_sidebar->setCurrentItem(items.first());
+            // Set content to student portal (which should be index 1 if dashboard exists, or 0 if not)
+            // Since we're not adding dashboard for students, student portal will be at index 0
+            m_contentArea->setCurrentIndex(0);
+        }
+    } else {
+        m_sidebar->setCurrentRow(0); // Dashboard
+    }
 }
 
 void MainWindow::onMenuChanged(int index)
