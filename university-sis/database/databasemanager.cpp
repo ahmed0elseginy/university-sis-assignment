@@ -206,6 +206,33 @@ void DatabaseManager::initSchema()
                "description TEXT, "
                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)").arg(autoInc));
 
+    // Library Books Table
+    query.exec(QString("CREATE TABLE IF NOT EXISTS books ("
+               "book_id %1, "
+               "isbn VARCHAR(20) UNIQUE, "
+               "title VARCHAR(255) NOT NULL, "
+               "author VARCHAR(255), "
+               "publisher VARCHAR(255), "
+               "publication_year INT, "
+               "category VARCHAR(100), "
+               "total_copies INT DEFAULT 1, "
+               "available_copies INT DEFAULT 1, "
+               "location VARCHAR(100))").arg(autoInc));
+
+    // Book Loans/Transactions Table
+    query.exec(QString("CREATE TABLE IF NOT EXISTS book_loans ("
+               "loan_id %1, "
+               "book_id INT NOT NULL, "
+               "student_id INT, "
+               "faculty_id INT, "
+               "checkout_date DATE NOT NULL, "
+               "due_date DATE NOT NULL, "
+               "return_date DATE, "
+               "status VARCHAR(20) DEFAULT 'Checked Out', " // Checked Out, Returned, Overdue
+               "FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE, "
+               "FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE SET NULL, "
+               "FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id) ON DELETE SET NULL)").arg(autoInc));
+
      // Seed admin user if not exists
      QSqlQuery seed;
      // SQLite uses INSERT OR IGNORE, MySQL uses INSERT IGNORE.
@@ -324,4 +351,22 @@ void DatabaseManager::seedSampleData()
                "(2, 500.00, 'Lab Fee', 'Paid', '2024-09-15'), "
                "(3, 500.00, 'Lab Fee', 'Paid', '2024-09-16'), "
                "(4, 500.00, 'Lab Fee', 'Paid', '2024-09-16')");
+    
+    // Seed Library Books
+    query.exec("INSERT INTO books (isbn, title, author, publisher, publication_year, category, total_copies, available_copies, location) VALUES "
+               "('978-0131103627', 'The C++ Programming Language', 'Bjarne Stroustrup', 'Addison-Wesley', 2013, 'Computer Science', 5, 3, 'Main Library - CS Section'), "
+               "('978-0201633610', 'Design Patterns: Elements of Reusable Object-Oriented Software', 'Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides', 'Addison-Wesley', 1994, 'Computer Science', 3, 1, 'Main Library - CS Section'), "
+               "('978-0132350884', 'Clean Code: A Handbook of Agile Software Craftsmanship', 'Robert C. Martin', 'Prentice Hall', 2008, 'Computer Science', 4, 4, 'Main Library - CS Section'), "
+               "('978-0321751041', 'The Art of Computer Programming', 'Donald Knuth', 'Addison-Wesley', 2011, 'Computer Science', 2, 2, 'Main Library - Reference'), "
+               "('978-1449331818', 'Learning React: Modern Patterns for Developing React Apps', 'Alex Banks, Eve Porcello', 'O''Reilly Media', 2020, 'Computer Science', 3, 2, 'Main Library - CS Section'), "
+               "('978-0596007126', 'Head First Design Patterns', 'Eric Freeman, Elisabeth Robson', 'O''Reilly Media', 2004, 'Computer Science', 4, 3, 'Main Library - CS Section'), "
+               "('978-0134685991', 'Effective Java', 'Joshua Bloch', 'Addison-Wesley', 2018, 'Computer Science', 3, 2, 'Main Library - CS Section'), "
+               "('978-0135957059', 'The Pragmatic Programmer', 'Andrew Hunt, David Thomas', 'Addison-Wesley', 2019, 'Computer Science', 5, 4, 'Main Library - CS Section'), "
+               "('978-1491950358', 'Building Microservices', 'Sam Newman', 'O''Reilly Media', 2021, 'Computer Science', 2, 1, 'Main Library - CS Section'), "
+               "('978-0596009205', 'Head First Java', 'Kathy Sierra, Bert Bates', 'O''Reilly Media', 2005, 'Computer Science', 6, 5, 'Main Library - CS Section'), "
+               "('978-0132778046', 'Introduction to Algorithms', 'Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein', 'MIT Press', 2009, 'Computer Science', 4, 3, 'Main Library - CS Section'), "
+               "('978-1491929125', 'Python Crash Course', 'Eric Matthes', 'No Starch Press', 2019, 'Computer Science', 5, 4, 'Main Library - CS Section'), "
+               "('978-0134092669', 'Database System Concepts', 'Abraham Silberschatz, Henry F. Korth, S. Sudarshan', 'McGraw-Hill', 2019, 'Computer Science', 3, 2, 'Main Library - CS Section'), "
+               "('978-1119806916', 'Operating System Concepts', 'Abraham Silberschatz, Peter Baer Galvin, Greg Gagne', 'Wiley', 2021, 'Computer Science', 4, 3, 'Main Library - CS Section'), "
+               "('978-0133594140', 'Computer Networks', 'Andrew S. Tanenbaum, David J. Wetherall', 'Prentice Hall', 2013, 'Computer Science', 3, 2, 'Main Library - CS Section')");
 }
