@@ -38,6 +38,7 @@ private:
     QDateEdit *m_endDateEdit;
     QPushButton *m_generateBtn;
     QPushButton *m_exportBtn;
+    QPushButton *m_printBtn;
     QTextEdit *m_reportText;
     QTableView *m_reportTable;
     QStandardItemModel *m_reportModel;

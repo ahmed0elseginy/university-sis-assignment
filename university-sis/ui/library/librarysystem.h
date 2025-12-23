@@ -28,6 +28,18 @@ private:
     void loadBooks(const QString& filter = "");
     void refreshBooks();
     
+    // Helper functions for name-based operations
+    struct BorrowerInfo {
+        int id = 0;
+        QString name;
+        QString type; // "Student" or "Faculty"
+    };
+    
+    BorrowerInfo selectBorrowerByName(QWidget* parent);
+    int getStudentIdByName(const QString& name);
+    int getFacultyIdByName(const QString& name);
+    QString getBorrowerNameById(int id, const QString& type);
+    
     QTableView* m_view;
     QStandardItemModel* m_model;
     QLineEdit* m_search;

@@ -8,9 +8,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QComboBox>
-#include <QLineEdit>
 #include <QDoubleSpinBox>
-#include <QDateEdit>
 #include <QGroupBox>
 #include <QLabel>
 #include "../basesystemwidget.h"
@@ -34,6 +32,7 @@ private:
     void setupUi();
     void loadCourses();
     void loadGrades(int courseId);
+    QString calculateTotalGrade(const QString& a1, const QString& a2, const QString& finalExam);
     
     QString m_role;
     int m_userId;
@@ -41,10 +40,9 @@ private:
     QStandardItemModel *m_gradesModel;
     QComboBox *m_courseCombo;
     QComboBox *m_assignmentTypeCombo;
-    QLineEdit *m_assignmentNameEdit;
+    QComboBox *m_studentCombo;  // For admin/faculty to select student
     QDoubleSpinBox *m_scoreSpin;
-    QDoubleSpinBox *m_maxScoreSpin;
-    QDateEdit *m_gradeDateEdit;
+    QDoubleSpinBox *m_maxScoreSpin;  // Hidden, always 100
     QPushButton *m_addBtn;
     QPushButton *m_deleteBtn;
     QLabel *m_gpaLabel;

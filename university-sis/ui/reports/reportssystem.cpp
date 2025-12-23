@@ -50,9 +50,11 @@ void ReportsSystem::setupUi()
     auto buttonLayout = new QHBoxLayout();
     m_generateBtn = new QPushButton("Generate Report", this);
     m_generateBtn->setProperty("type", "primary");
-    m_exportBtn = new QPushButton("Export to File", this);
+    m_exportBtn = new QPushButton("Export to CSV", this);
+    m_printBtn = new QPushButton("Print", this);
     buttonLayout->addWidget(m_generateBtn);
     buttonLayout->addWidget(m_exportBtn);
+    buttonLayout->addWidget(m_printBtn);
     buttonLayout->addStretch();
     controlsLayout->addLayout(buttonLayout);
     
@@ -77,10 +79,24 @@ void ReportsSystem::setupUi()
     
     mainLayout->addWidget(displayGroup, 1);
     
+    // Improve table display
+    m_reportTable->setSortingEnabled(true);
+    m_reportTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    m_reportTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_reportTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
     // Connections
     connect(m_reportTypeCombo, &QComboBox::currentIndexChanged, this, &ReportsSystem::onReportTypeChanged);
     connect(m_generateBtn, &QPushButton::clicked, this, &ReportsSystem::onGenerateReport);
     connect(m_exportBtn, &QPushButton::clicked, this, &ReportsSystem::onExportReport);
+    connect(m_printBtn, &QPushButton::clicked, this, [this]() {
+        if (m_reportModel->rowCount() > 0) {
+            QMessageBox::information(this, "Print", 
+                "Print functionality: Please use Export to CSV and print from your preferred application.");
+        } else {
+            QMessageBox::information(this, "Print", "Please generate a report first.");
+        }
+    });
 }
 
 void ReportsSystem::onReportTypeChanged(int index)
@@ -106,42 +122,44 @@ void ReportsSystem::generateStudentReport()
 {
     m_reportModel->clear();
     QStringList headers;
-    headers << "Student ID" << "Name" << "Email" << "Major" << "Enrollment Date" << "Courses Enrolled";
+    headers << "Student ID" << "Name" << "Year" << "Department" << "Section ID" << "Courses Enrolled";
     m_reportModel->setHorizontalHeaderLabels(headers);
     
     QSqlQuery query(DatabaseManager::instance().getDatabase());
-    query.prepare("SELECT s.id, s.first_name, s.last_name, s.email, s.major, s.enrollment_date, "
-                 "COUNT(e.id) as course_count "
+    query.prepare("SELECT s.student_id, s.name, s.year, s.department, s.section_id, "
+                 "COUNT(DISTINCT ss.section_id) as course_count "
                  "FROM students s "
-                 "LEFT JOIN enrollments e ON s.id = e.student_id "
-                 "WHERE s.enrollment_date BETWEEN :start_date AND :end_date "
-                 "GROUP BY s.id "
-                 "ORDER BY s.id");
-    query.bindValue(":start_date", m_startDateEdit->date().toString("yyyy-MM-dd"));
-    query.bindValue(":end_date", m_endDateEdit->date().toString("yyyy-MM-dd"));
+                 "LEFT JOIN student_section ss ON s.student_id = ss.student_id "
+                 "GROUP BY s.student_id "
+                 "ORDER BY s.name");
     
     int totalStudents = 0;
+    int totalEnrollments = 0;
     if (query.exec()) {
         while (query.next()) {
             int row = m_reportModel->rowCount();
             m_reportModel->insertRow(row);
-            m_reportModel->setItem(row, 0, new QStandardItem(query.value("id").toString()));
-            m_reportModel->setItem(row, 1, new QStandardItem(query.value("first_name").toString() + " " + query.value("last_name").toString()));
-            m_reportModel->setItem(row, 2, new QStandardItem(query.value("email").toString()));
-            m_reportModel->setItem(row, 3, new QStandardItem(query.value("major").toString()));
-            m_reportModel->setItem(row, 4, new QStandardItem(query.value("enrollment_date").toDate().toString("MMM dd, yyyy")));
-            m_reportModel->setItem(row, 5, new QStandardItem(query.value("course_count").toString()));
+            m_reportModel->setItem(row, 0, new QStandardItem(query.value("student_id").toString()));
+            m_reportModel->setItem(row, 1, new QStandardItem(query.value("name").toString()));
+            m_reportModel->setItem(row, 2, new QStandardItem(query.value("year").toString()));
+            m_reportModel->setItem(row, 3, new QStandardItem(query.value("department").toString()));
+            m_reportModel->setItem(row, 4, new QStandardItem(query.value("section_id").toString()));
+            int courseCount = query.value("course_count").toInt();
+            m_reportModel->setItem(row, 5, new QStandardItem(QString::number(courseCount)));
             totalStudents++;
+            totalEnrollments += courseCount;
         }
     }
     
+    double avgCourses = totalStudents > 0 ? (totalEnrollments * 1.0 / totalStudents) : 0;
     m_reportText->setPlainText(QString("Student Enrollment Report\n"
-                                       "Period: %1 to %2\n"
-                                       "Total Students: %3\n"
+                                       "Total Students: %1\n"
+                                       "Total Course Enrollments: %2\n"
+                                       "Average Courses per Student: %3\n"
                                        "Generated: %4")
-                               .arg(m_startDateEdit->date().toString("MMM dd, yyyy"))
-                               .arg(m_endDateEdit->date().toString("MMM dd, yyyy"))
                                .arg(totalStudents)
+                               .arg(totalEnrollments)
+                               .arg(QString::number(avgCourses, 'f', 1))
                                .arg(QDate::currentDate().toString("MMM dd, yyyy")));
 }
 
@@ -149,38 +167,65 @@ void ReportsSystem::generateCourseReport()
 {
     m_reportModel->clear();
     QStringList headers;
-    headers << "Course Code" << "Course Name" << "Credits" << "Students Enrolled" << "Average Grade";
+    headers << "Course ID" << "Course Name" << "Year" << "Hours" << "Sections" << "Students Enrolled" << "Avg Grade";
     m_reportModel->setHorizontalHeaderLabels(headers);
     
     QSqlQuery query(DatabaseManager::instance().getDatabase());
-    query.prepare("SELECT c.course_code, c.course_name, c.credits, "
-                 "COUNT(DISTINCT e.student_id) as enrolled, "
-                 "AVG(CASE WHEN g.max_score > 0 THEN (g.score / g.max_score) * 100 ELSE NULL END) as avg_grade "
+    query.prepare("SELECT c.course_id, c.name as course_name, c.year, c.hours, "
+                 "COUNT(DISTINCT sec.section_id) as section_count, "
+                 "COUNT(DISTINCT ss.student_id) as enrolled, "
+                 "AVG(CASE WHEN g.final_exam = 'A' THEN 95 "
+                 "          WHEN g.final_exam = 'A-' THEN 90 "
+                 "          WHEN g.final_exam = 'B+' THEN 87 "
+                 "          WHEN g.final_exam = 'B' THEN 83 "
+                 "          WHEN g.final_exam = 'B-' THEN 80 "
+                 "          WHEN g.final_exam = 'C+' THEN 77 "
+                 "          WHEN g.final_exam = 'C' THEN 73 "
+                 "          WHEN g.final_exam = 'C-' THEN 70 "
+                 "          WHEN g.final_exam = 'D+' THEN 67 "
+                 "          WHEN g.final_exam = 'D' THEN 63 "
+                 "          WHEN g.final_exam = 'D-' THEN 60 "
+                 "          WHEN g.final_exam = 'F' THEN 50 "
+                 "          ELSE NULL END) as avg_grade "
                  "FROM courses c "
-                 "LEFT JOIN enrollments e ON c.id = e.course_id "
-                 "LEFT JOIN grades g ON e.id = g.enrollment_id "
-                 "GROUP BY c.id "
-                 "ORDER BY c.course_code");
+                 "LEFT JOIN sections sec ON c.course_id = sec.course_id "
+                 "LEFT JOIN student_section ss ON sec.section_id = ss.section_id "
+                 "LEFT JOIN grades g ON (ss.student_id = g.student_id AND c.course_id = g.course_id) "
+                 "GROUP BY c.course_id "
+                 "ORDER BY c.year, c.name");
     
     int totalCourses = 0;
+    int totalEnrollments = 0;
     if (query.exec()) {
         while (query.next()) {
             int row = m_reportModel->rowCount();
             m_reportModel->insertRow(row);
-            m_reportModel->setItem(row, 0, new QStandardItem(query.value("course_code").toString()));
+            m_reportModel->setItem(row, 0, new QStandardItem(query.value("course_id").toString()));
             m_reportModel->setItem(row, 1, new QStandardItem(query.value("course_name").toString()));
-            m_reportModel->setItem(row, 2, new QStandardItem(query.value("credits").toString()));
-            m_reportModel->setItem(row, 3, new QStandardItem(query.value("enrolled").toString()));
+            m_reportModel->setItem(row, 2, new QStandardItem(query.value("year").toString()));
+            m_reportModel->setItem(row, 3, new QStandardItem(query.value("hours").toString()));
+            m_reportModel->setItem(row, 4, new QStandardItem(query.value("section_count").toString()));
+            int enrolled = query.value("enrolled").toInt();
+            m_reportModel->setItem(row, 5, new QStandardItem(QString::number(enrolled)));
             double avgGrade = query.value("avg_grade").toDouble();
-            m_reportModel->setItem(row, 4, new QStandardItem(avgGrade > 0 ? QString::number(avgGrade, 'f', 1) + "%" : "N/A"));
+            auto gradeItem = new QStandardItem(avgGrade > 0 ? QString::number(avgGrade, 'f', 1) : "N/A");
+            if (avgGrade >= 90) gradeItem->setForeground(QBrush(QColor("#27ae60")));
+            else if (avgGrade >= 70) gradeItem->setForeground(QBrush(QColor("#f39c12")));
+            else if (avgGrade > 0) gradeItem->setForeground(QBrush(QColor("#c0392b")));
+            m_reportModel->setItem(row, 6, gradeItem);
             totalCourses++;
+            totalEnrollments += enrolled;
         }
     }
     
     m_reportText->setPlainText(QString("Course Statistics Report\n"
                                        "Total Courses: %1\n"
-                                       "Generated: %2")
+                                       "Total Enrollments: %2\n"
+                                       "Average Enrollments per Course: %3\n"
+                                       "Generated: %4")
                                .arg(totalCourses)
+                               .arg(totalEnrollments)
+                               .arg(totalCourses > 0 ? QString::number(totalEnrollments * 1.0 / totalCourses, 'f', 1) : "0")
                                .arg(QDate::currentDate().toString("MMM dd, yyyy")));
 }
 
@@ -188,33 +233,45 @@ void ReportsSystem::generateAttendanceReport()
 {
     m_reportModel->clear();
     QStringList headers;
-    headers << "Date" << "Student" << "Course" << "Status" << "Remarks";
+    headers << "Date" << "Student Name" << "Student ID" << "Course Name" << "Status";
     m_reportModel->setHorizontalHeaderLabels(headers);
     
     QSqlQuery query(DatabaseManager::instance().getDatabase());
-    query.prepare("SELECT a.date, s.first_name, s.last_name, c.course_code, a.status, a.remarks "
+    query.prepare("SELECT a.date, s.name as student_name, s.student_id, c.name as course_name, a.status "
                  "FROM attendance a "
-                 "JOIN students s ON a.student_id = s.id "
-                 "JOIN courses c ON a.course_id = c.id "
+                 "LEFT JOIN students s ON a.student_id = s.student_id "
+                 "LEFT JOIN courses c ON a.course_id = c.course_id "
                  "WHERE a.date BETWEEN :start_date AND :end_date "
-                 "ORDER BY a.date DESC");
+                 "ORDER BY a.date DESC, s.name");
     query.bindValue(":start_date", m_startDateEdit->date().toString("yyyy-MM-dd"));
     query.bindValue(":end_date", m_endDateEdit->date().toString("yyyy-MM-dd"));
     
     int totalRecords = 0;
     int presentCount = 0;
+    int absentCount = 0;
+    int lateCount = 0;
     if (query.exec()) {
         while (query.next()) {
             int row = m_reportModel->rowCount();
             m_reportModel->insertRow(row);
             m_reportModel->setItem(row, 0, new QStandardItem(query.value("date").toDate().toString("MMM dd, yyyy")));
-            m_reportModel->setItem(row, 1, new QStandardItem(query.value("first_name").toString() + " " + query.value("last_name").toString()));
-            m_reportModel->setItem(row, 2, new QStandardItem(query.value("course_code").toString()));
+            m_reportModel->setItem(row, 1, new QStandardItem(query.value("student_name").toString()));
+            m_reportModel->setItem(row, 2, new QStandardItem(query.value("student_id").toString()));
+            m_reportModel->setItem(row, 3, new QStandardItem(query.value("course_name").toString()));
             QString status = query.value("status").toString();
-            m_reportModel->setItem(row, 3, new QStandardItem(status));
-            m_reportModel->setItem(row, 4, new QStandardItem(query.value("remarks").toString()));
+            auto statusItem = new QStandardItem(status);
+            if (status == "Present") {
+                statusItem->setForeground(QBrush(QColor("#27ae60")));
+                presentCount++;
+            } else if (status == "Absent") {
+                statusItem->setForeground(QBrush(QColor("#c0392b")));
+                absentCount++;
+            } else if (status == "Late") {
+                statusItem->setForeground(QBrush(QColor("#f39c12")));
+                lateCount++;
+            }
+            m_reportModel->setItem(row, 4, statusItem);
             totalRecords++;
-            if (status == "Present") presentCount++;
         }
     }
     
@@ -223,12 +280,16 @@ void ReportsSystem::generateAttendanceReport()
                                        "Period: %1 to %2\n"
                                        "Total Records: %3\n"
                                        "Present: %4\n"
-                                       "Attendance Rate: %5%\n"
-                                       "Generated: %6")
+                                       "Absent: %5\n"
+                                       "Late: %6\n"
+                                       "Attendance Rate: %7%\n"
+                                       "Generated: %8")
                                .arg(m_startDateEdit->date().toString("MMM dd, yyyy"))
                                .arg(m_endDateEdit->date().toString("MMM dd, yyyy"))
                                .arg(totalRecords)
                                .arg(presentCount)
+                               .arg(absentCount)
+                               .arg(lateCount)
                                .arg(QString::number(attendanceRate, 'f', 1))
                                .arg(QDate::currentDate().toString("MMM dd, yyyy")));
 }
@@ -237,30 +298,56 @@ void ReportsSystem::generateFinancialReport()
 {
     m_reportModel->clear();
     QStringList headers;
-    headers << "Student" << "Payment Date" << "Amount" << "Status" << "Description";
+    headers << "Payment ID" << "Student Name" << "Student ID" << "Date" << "Amount" << "Status" << "Description";
     m_reportModel->setHorizontalHeaderLabels(headers);
     
     QSqlQuery query(DatabaseManager::instance().getDatabase());
-    query.prepare("SELECT s.first_name, s.last_name, p.payment_date, p.amount, p.status, p.description "
+    query.prepare("SELECT p.payment_id, s.name as student_name, s.student_id, p.date, p.amount, p.status, p.description "
                  "FROM payments p "
-                 "JOIN students s ON p.student_id = s.id "
-                 "WHERE p.payment_date BETWEEN :start_date AND :end_date "
-                 "ORDER BY p.payment_date DESC");
+                 "LEFT JOIN students s ON p.student_id = s.student_id "
+                 "WHERE p.date BETWEEN :start_date AND :end_date "
+                 "ORDER BY p.date DESC");
     query.bindValue(":start_date", m_startDateEdit->date().toString("yyyy-MM-dd"));
     query.bindValue(":end_date", m_endDateEdit->date().toString("yyyy-MM-dd"));
     
     int totalPayments = 0;
     double totalAmount = 0;
+    double paidAmount = 0;
+    double pendingAmount = 0;
+    double overdueAmount = 0;
+    int paidCount = 0;
+    int pendingCount = 0;
+    int overdueCount = 0;
+    
     if (query.exec()) {
         while (query.next()) {
             int row = m_reportModel->rowCount();
             m_reportModel->insertRow(row);
-            m_reportModel->setItem(row, 0, new QStandardItem(query.value("first_name").toString() + " " + query.value("last_name").toString()));
-            m_reportModel->setItem(row, 1, new QStandardItem(query.value("payment_date").toDate().toString("MMM dd, yyyy")));
+            m_reportModel->setItem(row, 0, new QStandardItem(query.value("payment_id").toString()));
+            m_reportModel->setItem(row, 1, new QStandardItem(query.value("student_name").toString()));
+            m_reportModel->setItem(row, 2, new QStandardItem(query.value("student_id").toString()));
+            m_reportModel->setItem(row, 3, new QStandardItem(query.value("date").toDate().toString("MMM dd, yyyy")));
             double amount = query.value("amount").toDouble();
-            m_reportModel->setItem(row, 2, new QStandardItem("$" + QString::number(amount, 'f', 2)));
-            m_reportModel->setItem(row, 3, new QStandardItem(query.value("status").toString()));
-            m_reportModel->setItem(row, 4, new QStandardItem(query.value("description").toString()));
+            auto amountItem = new QStandardItem(QString("$%1").arg(amount, 0, 'f', 2));
+            amountItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            m_reportModel->setItem(row, 4, amountItem);
+            QString status = query.value("status").toString();
+            auto statusItem = new QStandardItem(status);
+            if (status == "Paid") {
+                statusItem->setForeground(QBrush(QColor("#27ae60")));
+                paidAmount += amount;
+                paidCount++;
+            } else if (status == "Pending") {
+                statusItem->setForeground(QBrush(QColor("#f39c12")));
+                pendingAmount += amount;
+                pendingCount++;
+            } else if (status == "Overdue") {
+                statusItem->setForeground(QBrush(QColor("#c0392b")));
+                overdueAmount += amount;
+                overdueCount++;
+            }
+            m_reportModel->setItem(row, 5, statusItem);
+            m_reportModel->setItem(row, 6, new QStandardItem(query.value("description").toString()));
             totalPayments++;
             totalAmount += amount;
         }
@@ -270,17 +357,37 @@ void ReportsSystem::generateFinancialReport()
                                        "Period: %1 to %2\n"
                                        "Total Payments: %3\n"
                                        "Total Amount: $%4\n"
-                                       "Generated: %5")
+                                       "Paid: %5 ($%6)\n"
+                                       "Pending: %7 ($%8)\n"
+                                       "Overdue: %9 ($%10)\n"
+                                       "Collection Rate: %11%\n"
+                                       "Generated: %12")
                                .arg(m_startDateEdit->date().toString("MMM dd, yyyy"))
                                .arg(m_endDateEdit->date().toString("MMM dd, yyyy"))
                                .arg(totalPayments)
                                .arg(QString::number(totalAmount, 'f', 2))
+                               .arg(paidCount)
+                               .arg(QString::number(paidAmount, 'f', 2))
+                               .arg(pendingCount)
+                               .arg(QString::number(pendingAmount, 'f', 2))
+                               .arg(overdueCount)
+                               .arg(QString::number(overdueAmount, 'f', 2))
+                               .arg(totalAmount > 0 ? QString::number((paidAmount / totalAmount) * 100, 'f', 1) : "0")
                                .arg(QDate::currentDate().toString("MMM dd, yyyy")));
 }
 
 void ReportsSystem::onExportReport()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Export Report", "", "CSV Files (*.csv);;Text Files (*.txt)");
+    if (m_reportModel->rowCount() == 0) {
+        QMessageBox::information(this, "Export", "Please generate a report first.");
+        return;
+    }
+    
+    QString fileName = QFileDialog::getSaveFileName(this, "Export Report", 
+                                                    QString("Report_%1_%2.csv")
+                                                    .arg(m_reportTypeCombo->currentText().replace(" ", "_"))
+                                                    .arg(QDate::currentDate().toString("yyyyMMdd")), 
+                                                    "CSV Files (*.csv);;Text Files (*.txt)");
     if (fileName.isEmpty()) return;
     
     QFile file(fileName);
@@ -290,11 +397,19 @@ void ReportsSystem::onExportReport()
     }
     
     QTextStream out(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    out.setEncoding(QStringConverter::Utf8);
+#else
+    out.setCodec("UTF-8");
+#endif
     
-    // Write header
+    // Write summary header
+    out << m_reportText->toPlainText() << "\n\n";
+    
+    // Write table header
     for (int col = 0; col < m_reportModel->columnCount(); ++col) {
         if (col > 0) out << ",";
-        out << m_reportModel->headerData(col, Qt::Horizontal).toString();
+        out << "\"" << m_reportModel->headerData(col, Qt::Horizontal).toString().replace("\"", "\"\"") << "\"";
     }
     out << "\n";
     
@@ -304,16 +419,16 @@ void ReportsSystem::onExportReport()
             if (col > 0) out << ",";
             QStandardItem *item = m_reportModel->item(row, col);
             if (item) {
-                out << "\"" << item->text().replace("\"", "\"\"") << "\"";
+                QString text = item->text().replace("\"", "\"\"");
+                out << "\"" << text << "\"";
+            } else {
+                out << "\"\"";
             }
         }
         out << "\n";
     }
     
-    // Write summary
-    out << "\n" << m_reportText->toPlainText();
-    
     file.close();
-    QMessageBox::information(this, "Success", "Report exported successfully.");
+    QMessageBox::information(this, "Success", QString("Report exported successfully to:\n%1").arg(fileName));
 }
 

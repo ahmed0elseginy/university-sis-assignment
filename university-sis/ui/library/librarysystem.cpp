@@ -1,4 +1,6 @@
 #include "librarysystem.h"
+#include "../../modules/student/studentrepository.h"
+#include "../../modules/faculty/facultyrepository.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -13,6 +15,11 @@
 #include <QStringList>
 #include <QDialog>
 #include <QDate>
+#include <QDialogButtonBox>
+#include <QStandardItem>
+#include <QBrush>
+#include <QColor>
+#include <QPair>
 #include "../../database/databasemanager.h"
 
 LibrarySystem::LibrarySystem(QWidget* parent) 
@@ -302,6 +309,158 @@ void LibrarySystem::onAddBook() {
     }
 }
 
+LibrarySystem::BorrowerInfo LibrarySystem::selectBorrowerByName(QWidget* parent) {
+    BorrowerInfo result;
+    QDialog dialog(parent);
+    dialog.setWindowTitle("Select Borrower");
+    dialog.setModal(true);
+    dialog.setMinimumSize(600, 500);
+    
+    auto layout = new QVBoxLayout(&dialog);
+    layout->setSpacing(15);
+    
+    // Search box
+    auto searchLayout = new QHBoxLayout();
+    searchLayout->addWidget(new QLabel("Search by name:"));
+    auto searchEdit = new QLineEdit(&dialog);
+    searchEdit->setPlaceholderText("Type name to search...");
+    searchLayout->addWidget(searchEdit);
+    layout->addLayout(searchLayout);
+    
+    // Type selection
+    auto typeLayout = new QHBoxLayout();
+    typeLayout->addWidget(new QLabel("Type:"));
+    auto typeCombo = new QComboBox(&dialog);
+    typeCombo->addItem("All", "All");
+    typeCombo->addItem("Students", "Student");
+    typeCombo->addItem("Faculty", "Faculty");
+    typeLayout->addWidget(typeCombo);
+    typeLayout->addStretch();
+    layout->addLayout(typeLayout);
+    
+    // Results table
+    auto table = new QTableView(&dialog);
+    auto model = new QStandardItemModel(&dialog);
+    model->setColumnCount(3);
+    model->setHorizontalHeaderLabels({"ID", "Name", "Type"});
+    table->setModel(model);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->horizontalHeader()->setStretchLastSection(true);
+    table->verticalHeader()->setVisible(false);
+    table->setAlternatingRowColors(true);
+    layout->addWidget(table);
+    
+    // Populate function
+    auto populateResults = [&](const QString& searchText, const QString& typeFilter) {
+        model->removeRows(0, model->rowCount());
+        
+        // Add students
+        if (typeFilter == "All" || typeFilter == "Student") {
+            StudentRepository studentRepo;
+            auto students = studentRepo.getAllStudents();
+            for (const auto& student : students) {
+                if (searchText.isEmpty() || student.name.contains(searchText, Qt::CaseInsensitive)) {
+                    int row = model->rowCount();
+                    model->insertRow(row);
+                    model->setItem(row, 0, new QStandardItem(QString::number(student.id)));
+                    model->setItem(row, 1, new QStandardItem(student.name));
+                    model->setItem(row, 2, new QStandardItem("Student"));
+                    model->item(row, 0)->setData(student.id, Qt::UserRole);
+                    model->item(row, 2)->setData("Student", Qt::UserRole);
+                }
+            }
+        }
+        
+        // Add faculty
+        if (typeFilter == "All" || typeFilter == "Faculty") {
+            FacultyRepository facultyRepo;
+            auto facultyList = facultyRepo.getAllFaculty();
+            for (const auto& faculty : facultyList) {
+                if (searchText.isEmpty() || faculty.name.contains(searchText, Qt::CaseInsensitive)) {
+                    int row = model->rowCount();
+                    model->insertRow(row);
+                    model->setItem(row, 0, new QStandardItem(QString::number(faculty.id)));
+                    model->setItem(row, 1, new QStandardItem(faculty.name));
+                    model->setItem(row, 2, new QStandardItem("Faculty"));
+                    model->item(row, 0)->setData(faculty.id, Qt::UserRole);
+                    model->item(row, 2)->setData("Faculty", Qt::UserRole);
+                }
+            }
+        }
+    };
+    
+    // Initial population
+    populateResults("", "All");
+    
+    // Connect search
+    connect(searchEdit, &QLineEdit::textChanged, [&](const QString& text) {
+        populateResults(text, typeCombo->currentData().toString());
+    });
+    
+    // Connect type filter
+    connect(typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int) {
+        populateResults(searchEdit->text(), typeCombo->currentData().toString());
+    });
+    
+    // Buttons
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    layout->addWidget(buttonBox);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        auto selection = table->selectionModel()->selectedRows();
+        if (!selection.isEmpty()) {
+            int row = selection.first().row();
+            result.id = model->item(row, 0)->data(Qt::UserRole).toInt();
+            result.name = model->item(row, 1)->text();
+            result.type = model->item(row, 2)->data(Qt::UserRole).toString();
+        }
+    }
+    
+    return result;
+}
+
+int LibrarySystem::getStudentIdByName(const QString& name) {
+    StudentRepository repo;
+    auto students = repo.getAllStudents();
+    for (const auto& student : students) {
+        if (student.name == name) {
+            return student.id;
+        }
+    }
+    return -1;
+}
+
+int LibrarySystem::getFacultyIdByName(const QString& name) {
+    FacultyRepository repo;
+    auto facultyList = repo.getAllFaculty();
+    for (const auto& faculty : facultyList) {
+        if (faculty.name == name) {
+            return faculty.id;
+        }
+    }
+    return -1;
+}
+
+QString LibrarySystem::getBorrowerNameById(int id, const QString& type) {
+    if (type == "Student") {
+        StudentRepository repo;
+        auto student = repo.getStudentById(id);
+        if (student) {
+            return student->name;
+        }
+    } else if (type == "Faculty") {
+        FacultyRepository repo;
+        auto faculty = repo.getFacultyById(id);
+        if (faculty) {
+            return faculty->name;
+        }
+    }
+    return "Unknown";
+}
+
 void LibrarySystem::onCheckOutBook() {
     auto selection = m_view->selectionModel()->selectedRows();
     if (selection.isEmpty()) {
@@ -320,37 +479,10 @@ void LibrarySystem::onCheckOutBook() {
         return;
     }
     
-    // Get borrower ID
-    bool ok;
-    int borrowerId = QInputDialog::getInt(this, "Check Out Book", 
-        QString("Enter Student/Faculty ID for '%1':").arg(bookTitle), 
-        0, 1, 999999, 1, &ok);
-    
-    if (!ok) return;
-    
-    // Check if borrower exists and determine type
-    QSqlQuery checkStudentQuery(DatabaseManager::instance().getDatabase());
-    checkStudentQuery.prepare("SELECT student_id FROM students WHERE student_id = :id");
-    checkStudentQuery.bindValue(":id", borrowerId);
-    
-    bool isStudent = false;
-    bool isFaculty = false;
-    
-    if (checkStudentQuery.exec() && checkStudentQuery.next()) {
-        isStudent = true;
-    } else {
-        QSqlQuery checkFacultyQuery(DatabaseManager::instance().getDatabase());
-        checkFacultyQuery.prepare("SELECT faculty_id FROM faculty WHERE faculty_id = :id");
-        checkFacultyQuery.bindValue(":id", borrowerId);
-        if (checkFacultyQuery.exec() && checkFacultyQuery.next()) {
-            isFaculty = true;
-        }
-    }
-    
-    if (!isStudent && !isFaculty) {
-        QMessageBox::warning(this, "Invalid ID", 
-            "The entered ID does not exist in the system.\n\nPlease verify the student or faculty ID.");
-        return;
+    // Select borrower by name
+    BorrowerInfo borrower = selectBorrowerByName(this);
+    if (borrower.id == 0) {
+        return; // User cancelled
     }
     
     // Calculate due date (14 days from now)
@@ -358,16 +490,16 @@ void LibrarySystem::onCheckOutBook() {
     QDate dueDate = checkoutDate.addDays(14);
     
     QSqlQuery query(DatabaseManager::instance().getDatabase());
-    if (isStudent) {
+    if (borrower.type == "Student") {
         query.prepare("INSERT INTO book_loans (book_id, student_id, checkout_date, due_date, status) "
                       "VALUES (:book_id, :student_id, :checkout_date, :due_date, 'Checked Out')");
         query.bindValue(":book_id", bookId);
-        query.bindValue(":student_id", borrowerId);
+        query.bindValue(":student_id", borrower.id);
     } else {
         query.prepare("INSERT INTO book_loans (book_id, faculty_id, checkout_date, due_date, status) "
                       "VALUES (:book_id, :faculty_id, :checkout_date, :due_date, 'Checked Out')");
         query.bindValue(":book_id", bookId);
-        query.bindValue(":faculty_id", borrowerId);
+        query.bindValue(":faculty_id", borrower.id);
     }
     query.bindValue(":checkout_date", checkoutDate.toString("yyyy-MM-dd"));
     query.bindValue(":due_date", dueDate.toString("yyyy-MM-dd"));
@@ -380,8 +512,8 @@ void LibrarySystem::onCheckOutBook() {
         updateQuery.exec();
         
         QMessageBox::information(this, "Success", 
-            QString("'%1' has been checked out successfully.\n\nDue Date: %2")
-            .arg(bookTitle).arg(dueDate.toString("MMMM dd, yyyy")));
+            QString("'%1' has been checked out to %2 (%3).\n\nDue Date: %4")
+            .arg(bookTitle).arg(borrower.name).arg(borrower.type).arg(dueDate.toString("MMMM dd, yyyy")));
         refreshBooks();
     } else {
         QMessageBox::critical(this, "Database Error", 
@@ -408,21 +540,120 @@ void LibrarySystem::onReturnBook() {
         return;
     }
     
-    // Find active loan for this book
+    // Find active loans for this book with borrower names
     QSqlQuery findQuery(DatabaseManager::instance().getDatabase());
-    findQuery.prepare("SELECT loan_id, student_id, due_date FROM book_loans "
-                      "WHERE book_id = :book_id AND status = 'Checked Out' "
-                      "ORDER BY checkout_date DESC LIMIT 1");
+    findQuery.prepare("SELECT bl.loan_id, bl.student_id, bl.faculty_id, bl.due_date, "
+                      "COALESCE(s.name, f.name) as borrower_name, "
+                      "CASE WHEN bl.student_id IS NOT NULL THEN 'Student' ELSE 'Faculty' END as borrower_type "
+                      "FROM book_loans bl "
+                      "LEFT JOIN students s ON bl.student_id = s.student_id "
+                      "LEFT JOIN faculty f ON bl.faculty_id = f.faculty_id "
+                      "WHERE bl.book_id = :book_id AND bl.status = 'Checked Out' "
+                      "ORDER BY bl.checkout_date DESC");
     findQuery.bindValue(":book_id", bookId);
     
-    if (!findQuery.exec() || !findQuery.next()) {
+    if (!findQuery.exec()) {
         QMessageBox::warning(this, "No Active Loan", 
             QString("No active loan found for '%1'.").arg(bookTitle));
         return;
     }
     
-    int loanId = findQuery.value("loan_id").toInt();
-    QDate dueDate = findQuery.value("due_date").toDate();
+    // Collect all loans first
+    QList<QPair<int, QPair<QDate, QString>>> loans;
+    while (findQuery.next()) {
+        loans.append(qMakePair(
+            findQuery.value("loan_id").toInt(),
+            qMakePair(
+                findQuery.value("due_date").toDate(),
+                findQuery.value("borrower_name").toString()
+            )
+        ));
+    }
+    
+    if (loans.isEmpty()) {
+        QMessageBox::warning(this, "No Active Loan", 
+            QString("No active loan found for '%1'.").arg(bookTitle));
+        return;
+    }
+    
+    // If multiple loans, let user select which one to return
+    int loanId = -1;
+    QDate dueDate;
+    QString borrowerName;
+    
+    if (loans.size() > 1) {
+        // Multiple loans - show selection dialog
+        QDialog selectDialog(this);
+        selectDialog.setWindowTitle("Select Loan to Return");
+        selectDialog.setModal(true);
+        selectDialog.setMinimumSize(500, 400);
+        
+        auto layout = new QVBoxLayout(&selectDialog);
+        layout->addWidget(new QLabel(QString("Multiple active loans found for '%1'. Select which one to return:").arg(bookTitle)));
+        
+        auto table = new QTableView(&selectDialog);
+        auto model = new QStandardItemModel(&selectDialog);
+        model->setColumnCount(3);
+        model->setHorizontalHeaderLabels({"Borrower Name", "Type", "Due Date"});
+        table->setModel(model);
+        table->setSelectionBehavior(QAbstractItemView::SelectRows);
+        table->setSelectionMode(QAbstractItemView::SingleSelection);
+        table->horizontalHeader()->setStretchLastSection(true);
+        table->verticalHeader()->setVisible(false);
+        
+        // Re-query to get borrower type
+        QSqlQuery typeQuery(DatabaseManager::instance().getDatabase());
+        typeQuery.prepare("SELECT bl.loan_id, bl.student_id, bl.faculty_id, bl.due_date, "
+                          "COALESCE(s.name, f.name) as borrower_name, "
+                          "CASE WHEN bl.student_id IS NOT NULL THEN 'Student' ELSE 'Faculty' END as borrower_type "
+                          "FROM book_loans bl "
+                          "LEFT JOIN students s ON bl.student_id = s.student_id "
+                          "LEFT JOIN faculty f ON bl.faculty_id = f.faculty_id "
+                          "WHERE bl.book_id = :book_id AND bl.status = 'Checked Out' "
+                          "ORDER BY bl.checkout_date DESC");
+        typeQuery.bindValue(":book_id", bookId);
+        typeQuery.exec();
+        
+        while (typeQuery.next()) {
+            int row = model->rowCount();
+            model->insertRow(row);
+            model->setItem(row, 0, new QStandardItem(typeQuery.value("borrower_name").toString()));
+            model->setItem(row, 1, new QStandardItem(typeQuery.value("borrower_type").toString()));
+            model->setItem(row, 2, new QStandardItem(typeQuery.value("due_date").toDate().toString("yyyy-MM-dd")));
+            model->item(row, 0)->setData(typeQuery.value("loan_id").toInt(), Qt::UserRole);
+            model->item(row, 0)->setData(typeQuery.value("due_date").toDate(), Qt::UserRole + 1);
+        }
+        layout->addWidget(table);
+        
+        auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &selectDialog);
+        connect(buttonBox, &QDialogButtonBox::accepted, &selectDialog, &QDialog::accept);
+        connect(buttonBox, &QDialogButtonBox::rejected, &selectDialog, &QDialog::reject);
+        layout->addWidget(buttonBox);
+        
+        if (selectDialog.exec() == QDialog::Accepted) {
+            auto selected = table->selectionModel()->selectedRows();
+            if (!selected.isEmpty()) {
+                int selectedRow = selected.first().row();
+                loanId = model->item(selectedRow, 0)->data(Qt::UserRole).toInt();
+                dueDate = model->item(selectedRow, 0)->data(Qt::UserRole + 1).toDate();
+                borrowerName = model->item(selectedRow, 0)->text();
+            } else {
+                return; // No selection
+            }
+        } else {
+            return; // User cancelled
+        }
+    } else {
+        // Single loan
+        loanId = findQuery.value("loan_id").toInt();
+        dueDate = findQuery.value("due_date").toDate();
+        borrowerName = findQuery.value("borrower_name").toString();
+    }
+    
+    if (loanId == -1) {
+        return;
+    }
+    
     QDate returnDate = QDate::currentDate();
     
     // Update loan status
@@ -438,7 +669,7 @@ void LibrarySystem::onReturnBook() {
         updateBookQuery.bindValue(":id", bookId);
         updateBookQuery.exec();
         
-        QString message = QString("'%1' has been returned successfully.").arg(bookTitle);
+        QString message = QString("'%1' has been returned successfully.\nBorrower: %2").arg(bookTitle).arg(borrowerName);
         if (returnDate > dueDate) {
             int daysOverdue = dueDate.daysTo(returnDate);
             message += QString("\n\nNote: This book was %1 day(s) overdue.").arg(daysOverdue);
