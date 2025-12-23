@@ -51,8 +51,8 @@ void EnrollmentSystem::setupUi()
     // Table
     m_view = new QTableView(this);
     m_model = new QStandardItemModel(this);
-    m_model->setColumnCount(3);
-    m_model->setHorizontalHeaderLabels({"Student ID", "Section ID", "Actions"});
+    m_model->setColumnCount(4);
+    m_model->setHorizontalHeaderLabels({"Student ID", "Student Name", "Section ID", "Actions"});
     m_view->setModel(m_model);
     styleTable();
     mainLayout->addWidget(m_view);
@@ -66,6 +66,7 @@ void EnrollmentSystem::styleTable()
     m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_view->setAlternatingRowColors(true);
     m_view->verticalHeader()->setVisible(false);
+    m_view->verticalHeader()->setDefaultSectionSize(50); // Ensure rows are tall enough for buttons
     m_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_view->setShowGrid(false);
     m_view->setStyleSheet("QTableView::item { padding: 5px; }");
@@ -74,7 +75,7 @@ void EnrollmentSystem::styleTable()
 void EnrollmentSystem::loadEnrollments()
 {
     m_model->removeRows(0, m_model->rowCount());
-    auto list = m_repo.getAllEnrollments();
+    auto list = m_repo.getAllEnrollmentsWithNames();
     
     for (const auto &e : list) {
         // Filter: If Student, matching ID only. 
@@ -84,6 +85,7 @@ void EnrollmentSystem::loadEnrollments()
 
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::number(e.studentId));
+        row << new QStandardItem(e.studentName.isEmpty() ? "N/A" : e.studentName);
         row << new QStandardItem(QString::number(e.sectionId));
         row << new QStandardItem("");
         
@@ -97,6 +99,7 @@ void EnrollmentSystem::loadEnrollments()
         if (m_currentUserRole != "Student") {
             QPushButton* deleteBtn = new QPushButton("Unenroll");
             deleteBtn->setCursor(Qt::PointingHandCursor);
+            deleteBtn->setFixedSize(90, 32);
             deleteBtn->setStyleSheet("QPushButton { background-color: #FFEBEE; color: #C62828; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 600; font-size: 12px; } QPushButton:hover { background-color: #FFCDD2; }");
             layout->addWidget(deleteBtn);
             
@@ -107,7 +110,7 @@ void EnrollmentSystem::loadEnrollments()
         
         layout->addStretch();
         
-        m_view->setIndexWidget(m_model->index(m_model->rowCount() - 1, 2), actionWidget);
+        m_view->setIndexWidget(m_model->index(m_model->rowCount() - 1, 3), actionWidget);
     }
 }
 

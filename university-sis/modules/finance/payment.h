@@ -7,6 +7,7 @@
 struct Payment {
     int id = 0;
     int studentId = 0;
+    QString studentName;  // Student name for display
     double amount = 0.0;
     QString description;
     QString status = "Pending"; // Pending, Paid, Overdue

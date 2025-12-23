@@ -14,6 +14,7 @@ public:
     bool deletePayment(int id);
     
     std::vector<Payment> getAllPayments();
+    std::vector<Payment> getAllPaymentsWithNames();  // Gets payments with student names
     std::optional<Payment> getPaymentById(int id);
 };
 

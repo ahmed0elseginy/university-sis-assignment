@@ -167,11 +167,17 @@ void DatabaseManager::initSchema()
     query.exec(QString("CREATE TABLE IF NOT EXISTS attendance ("
                "attendance_id %1, "
                "student_id INT, "
+               "section_id INT, "
                "course_id INT, "
                "date DATE, "
                "status VARCHAR(20), " // Present, Absent, Late
                "FOREIGN KEY (student_id) REFERENCES students(student_id), "
+               "FOREIGN KEY (section_id) REFERENCES sections(section_id), "
                "FOREIGN KEY (course_id) REFERENCES courses(course_id))").arg(autoInc));
+    
+    // Migration for Attendance: Add section_id column if missing (SQLite ignores if column exists)
+    // Note: Foreign key constraint can only be added in CREATE TABLE, not ALTER TABLE in SQLite
+    query.exec("ALTER TABLE attendance ADD COLUMN section_id INT");
                
     // 9. Notifications / News
     query.exec(QString("CREATE TABLE IF NOT EXISTS announcements ("
@@ -237,7 +243,7 @@ void DatabaseManager::initSchema()
      QSqlQuery seed;
      // SQLite uses INSERT OR IGNORE, MySQL uses INSERT IGNORE.
      // Standard SQL: check existence first or catch error. Simplest cross-db approach:
-     seed.prepare("INSERT INTO users (user_id, password_hash, role, display_name) VALUES (1, '1234', 'ADMIN', 'Administrator')");
+     seed.prepare("INSERT INTO users (user_id, password_hash, role, display_name) VALUES (1, '1234', 'ADMIN', 'المدير')");
      if(!seed.exec()) {
          // Ignore error if already exists (constraint violation)
      }
@@ -261,112 +267,195 @@ void DatabaseManager::seedSampleData()
         return; // Don't seed if data already exists
     }
     
-    // Seed Students
+    // Seed Students (Arabic names)
     query.exec("INSERT INTO students (name, year, department, username, password) VALUES "
-               "('John Smith', 2, 'Computer Science', 'john.smith', 'pass123'), "
-               "('Emily Johnson', 3, 'Mathematics', 'emily.j', 'pass123'), "
-               "('Michael Brown', 1, 'Physics', 'michael.b', 'pass123'), "
-               "('Sarah Davis', 4, 'Computer Science', 'sarah.d', 'pass123'), "
-               "('David Wilson', 2, 'Engineering', 'david.w', 'pass123'), "
-               "('Jessica Martinez', 3, 'Biology', 'jessica.m', 'pass123'), "
-               "('Robert Taylor', 1, 'Chemistry', 'robert.t', 'pass123'), "
-               "('Amanda Anderson', 4, 'Mathematics', 'amanda.a', 'pass123')");
+               "('أحمد محمد علي', 2, 'علوم الحاسب', 'ahmed.mohamed', 'pass123'), "
+               "('فاطمة حسن إبراهيم', 3, 'الرياضيات', 'fatima.hassan', 'pass123'), "
+               "('محمد خالد أحمد', 1, 'الفيزياء', 'mohamed.khaled', 'pass123'), "
+               "('سارة علي محمود', 4, 'علوم الحاسب', 'sara.ali', 'pass123'), "
+               "('عمر يوسف عبدالله', 2, 'الهندسة', 'omar.youssef', 'pass123'), "
+               "('مريم سالم حسين', 3, 'الأحياء', 'mariam.salem', 'pass123'), "
+               "('يوسف أحمد إسماعيل', 1, 'الكيمياء', 'youssef.ahmed', 'pass123'), "
+               "('نورا محمد عبدالرحمن', 4, 'الرياضيات', 'nora.mohamed', 'pass123'), "
+               "('خالد محمود سعيد', 2, 'علوم الحاسب', 'khaled.mahmoud', 'pass123'), "
+               "('ليلى أحمد فؤاد', 3, 'الهندسة', 'layla.ahmed', 'pass123')");
     
-    // Seed Faculty
+    // Seed Faculty (Arabic names with nctu.eg.edu domain)
     query.exec("INSERT INTO faculty (name, email, department, position, username, password) VALUES "
-               "('Dr. James Miller', 'james.miller@university.edu', 'Computer Science', 'Professor', 'james.m', 'pass123'), "
-               "('Dr. Patricia White', 'patricia.w@university.edu', 'Mathematics', 'Associate Professor', 'patricia.w', 'pass123'), "
-               "('Dr. Robert Harris', 'robert.h@university.edu', 'Physics', 'Professor', 'robert.h', 'pass123'), "
-               "('Dr. Linda Martin', 'linda.m@university.edu', 'Biology', 'Assistant Professor', 'linda.m', 'pass123'), "
-               "('Dr. William Thompson', 'william.t@university.edu', 'Engineering', 'Professor', 'william.t', 'pass123')");
+               "('د. محمد أحمد الشريف', 'mohamed.alsharif@nctu.eg.edu', 'علوم الحاسب', 'أستاذ', 'mohamed.sharif', 'pass123'), "
+               "('د. سامية محمود حسن', 'samia.hassan@nctu.eg.edu', 'الرياضيات', 'أستاذ مساعد', 'samia.hassan', 'pass123'), "
+               "('د. أحمد يوسف إبراهيم', 'ahmed.youssef@nctu.eg.edu', 'الفيزياء', 'أستاذ', 'ahmed.youssef', 'pass123'), "
+               "('د. هدى علي محمود', 'huda.ali@nctu.eg.edu', 'الأحياء', 'مدرس مساعد', 'huda.ali', 'pass123'), "
+               "('د. خالد محمد عبدالله', 'khaled.abdullah@nctu.eg.edu', 'الهندسة', 'أستاذ', 'khaled.abdullah', 'pass123'), "
+               "('د. منى حسن فؤاد', 'mona.fouad@nctu.eg.edu', 'الكيمياء', 'أستاذ مساعد', 'mona.fouad', 'pass123'), "
+               "('د. عمرو إسماعيل أحمد', 'amr.ismail@nctu.eg.edu', 'علوم الحاسب', 'أستاذ', 'amr.ismail', 'pass123'), "
+               "('د. نورا سعيد محمود', 'nora.saeed@nctu.eg.edu', 'الرياضيات', 'مدرس مساعد', 'nora.saeed', 'pass123')");
     
-    // Seed Courses
+    // Seed Courses (Arabic course names)
     query.exec("INSERT INTO courses (name, year, hours) VALUES "
-               "('Introduction to Programming', 1, 3), "
-               "('Data Structures', 2, 4), "
-               "('Database Systems', 3, 3), "
-               "('Software Engineering', 4, 4), "
-               "('Calculus I', 1, 4), "
-               "('Linear Algebra', 2, 3), "
-               "('Physics I', 1, 4), "
-               "('Chemistry Fundamentals', 1, 3), "
-               "('Biology 101', 1, 3), "
-               "('Advanced Algorithms', 3, 4), "
-               "('Machine Learning', 4, 3), "
-               "('Computer Networks', 3, 3), "
-               "('Operating Systems', 3, 4), "
-               "('Web Development', 2, 3), "
-               "('Mobile App Development', 3, 3), "
-               "('Cybersecurity', 4, 3), "
-               "('Artificial Intelligence', 4, 4), "
-               "('Distributed Systems', 4, 3), "
-               "('Computer Graphics', 3, 3), "
-               "('Digital Signal Processing', 4, 3), "
-               "('Embedded Systems', 3, 4), "
-               "('Cloud Computing', 4, 3), "
-               "('Big Data Analytics', 4, 3), "
-               "('Quantum Computing', 4, 3)");
+               "('مقدمة في البرمجة', 1, 3), "
+               "('هياكل البيانات', 2, 4), "
+               "('أنظمة قواعد البيانات', 3, 3), "
+               "('هندسة البرمجيات', 4, 4), "
+               "('حساب التفاضل والتكامل الأول', 1, 4), "
+               "('الجبر الخطي', 2, 3), "
+               "('الفيزياء العامة الأولى', 1, 4), "
+               "('أساسيات الكيمياء', 1, 3), "
+               "('الأحياء العامة 101', 1, 3), "
+               "('الخوارزميات المتقدمة', 3, 4), "
+               "('تعلم الآلة', 4, 3), "
+               "('شبكات الحاسب', 3, 3), "
+               "('نظم التشغيل', 3, 4), "
+               "('تطوير الويب', 2, 3), "
+               "('تطوير تطبيقات الجوال', 3, 3), "
+               "('الأمن السيبراني', 4, 3), "
+               "('الذكاء الاصطناعي', 4, 4), "
+               "('النظم الموزعة', 4, 3), "
+               "('رسوميات الحاسب', 3, 3), "
+               "('معالجة الإشارات الرقمية', 4, 3), "
+               "('النظم المدمجة', 3, 4), "
+               "('الحوسبة السحابية', 4, 3), "
+               "('تحليل البيانات الضخمة', 4, 3), "
+               "('الحوسبة الكمية', 4, 3)");
     
-    // Seed Buildings
+    // Seed Sections
+    query.exec("INSERT INTO sections (course_id, max_students) VALUES "
+               "(1, 50), (1, 50), (2, 40), (2, 40), (3, 35), "
+               "(4, 30), (5, 60), (5, 60), (6, 45), (7, 55), "
+               "(8, 40), (9, 40), (10, 35), (11, 30), (12, 35), "
+               "(13, 40), (14, 40), (15, 35), (16, 30), (17, 30), "
+               "(18, 35), (19, 35), (20, 40), (21, 30), (22, 30), (23, 25)");
+    
+    // Seed Student-Section enrollments
+    query.exec("INSERT INTO student_section (student_id, section_id) VALUES "
+               "(1, 1), (1, 3), (1, 14), (2, 5), (2, 9), (2, 11), "
+               "(3, 7), (3, 11), (4, 1), (4, 3), (4, 6), (4, 13), "
+               "(5, 1), (5, 8), (5, 14), (6, 11), (6, 12), (7, 7), "
+               "(7, 8), (8, 5), (8, 9), (9, 1), (9, 3), (9, 14), "
+               "(10, 1), (10, 8), (10, 14)");
+    
+    // Seed Attendance
+    query.exec("INSERT INTO attendance (student_id, section_id, course_id, date, status) VALUES "
+               "(1, 1, 1, '2024-09-15', 'Present'), (1, 1, 1, '2024-09-17', 'Present'), "
+               "(1, 1, 1, '2024-09-19', 'Late'), (1, 1, 1, '2024-09-22', 'Present'), "
+               "(2, 5, 3, '2024-09-16', 'Present'), (2, 5, 3, '2024-09-18', 'Absent'), "
+               "(2, 5, 3, '2024-09-20', 'Present'), (3, 7, 7, '2024-09-15', 'Present'), "
+               "(3, 7, 7, '2024-09-17', 'Present'), (4, 1, 1, '2024-09-15', 'Present'), "
+               "(4, 1, 1, '2024-09-17', 'Present'), (5, 1, 1, '2024-09-15', 'Present'), "
+               "(5, 1, 1, '2024-09-17', 'Late'), (6, 11, 9, '2024-09-16', 'Present'), "
+               "(7, 7, 7, '2024-09-15', 'Absent'), (8, 5, 3, '2024-09-16', 'Present'), "
+               "(9, 1, 1, '2024-09-15', 'Present'), (10, 1, 1, '2024-09-15', 'Present')");
+    
+    // Seed Grades
+    query.exec("INSERT INTO grades (student_id, course_id, a1, a2, final_exam, total) VALUES "
+               "(1, 1, 'A', 'B+', 'A', 'A'), (1, 2, 'B', 'B+', 'A-', 'B+'), "
+               "(1, 14, 'A-', 'A', 'A', 'A'), (2, 3, 'B+', 'B', 'A', 'B+'), "
+               "(2, 6, 'A', 'A-', 'A', 'A'), (2, 9, 'B', 'B+', 'B+', 'B+'), "
+               "(3, 7, 'A-', 'A', 'A-', 'A-'), (3, 8, 'B+', 'B', 'B+', 'B+'), "
+               "(4, 1, 'A', 'A', 'A', 'A'), (4, 2, 'A-', 'A', 'A-', 'A-'), "
+               "(4, 4, 'A', 'A-', 'A', 'A'), (4, 10, 'B+', 'A-', 'A-', 'A-'), "
+               "(5, 1, 'B+', 'A-', 'B+', 'A-'), (5, 5, 'A', 'A', 'A', 'A'), "
+               "(5, 14, 'B', 'B+', 'A-', 'B+'), (6, 9, 'A-', 'A', 'A', 'A'), "
+               "(6, 12, 'B+', 'B+', 'A-', 'B+'), (7, 7, 'B', 'B+', 'B', 'B+'), "
+               "(7, 8, 'B+', 'B', 'B+', 'B+'), (8, 3, 'A', 'A-', 'A', 'A'), "
+               "(8, 6, 'A', 'A', 'A', 'A'), (9, 1, 'A-', 'A', 'A-', 'A'), "
+               "(9, 2, 'B+', 'A-', 'A-', 'A-'), (9, 14, 'A', 'A-', 'A', 'A'), "
+               "(10, 1, 'B+', 'A-', 'B+', 'A-'), (10, 5, 'A', 'A-', 'A', 'A'), "
+               "(10, 14, 'B+', 'B+', 'A-', 'B+')");
+    
+    // Seed Buildings (Arabic names)
     query.exec("INSERT INTO buildings (name, code, location) VALUES "
-               "('Science Building', 'SCI', 'North Campus'), "
-               "('Engineering Hall', 'ENG', 'East Campus'), "
-               "('Library Building', 'LIB', 'Central Campus'), "
-               "('Arts Center', 'ART', 'South Campus'), "
-               "('Student Center', 'STU', 'Central Campus'), "
-               "('Computer Science Building', 'CS', 'North Campus'), "
-               "('Mathematics Building', 'MATH', 'East Campus'), "
-               "('Biology Lab', 'BIO', 'North Campus'), "
-               "('Chemistry Lab', 'CHEM', 'North Campus'), "
-               "('Physics Lab', 'PHYS', 'North Campus'), "
-               "('Engineering Lab', 'ENGLAB', 'East Campus'), "
-               "('Research Center', 'RES', 'South Campus')");
+               "('مبنى العلوم', 'SCI', 'الحرم الشمالي'), "
+               "('قاعة الهندسة', 'ENG', 'الحرم الشرقي'), "
+               "('مبنى المكتبة', 'LIB', 'الحرم المركزي'), "
+               "('مركز الفنون', 'ART', 'الحرم الجنوبي'), "
+               "('مركز الطلاب', 'STU', 'الحرم المركزي'), "
+               "('مبنى علوم الحاسب', 'CS', 'الحرم الشمالي'), "
+               "('مبنى الرياضيات', 'MATH', 'الحرم الشرقي'), "
+               "('مختبر الأحياء', 'BIO', 'الحرم الشمالي'), "
+               "('مختبر الكيمياء', 'CHEM', 'الحرم الشمالي'), "
+               "('مختبر الفيزياء', 'PHYS', 'الحرم الشمالي'), "
+               "('مختبر الهندسة', 'ENGLAB', 'الحرم الشرقي'), "
+               "('مركز الأبحاث', 'RES', 'الحرم الجنوبي')");
     
-    // Seed Rooms
+    // Seed Rooms (Arabic types)
     query.exec("INSERT INTO rooms (building_id, room_number, type, capacity) VALUES "
-               "(1, '101', 'Lecture Hall', 100), (1, '102', 'Lecture Hall', 80), (1, '201', 'Lab', 30), "
-               "(2, '101', 'Lecture Hall', 120), (2, '202', 'Lab', 25), (2, '301', 'Lecture Hall', 90), "
-               "(3, '101', 'Study Room', 20), (3, '201', 'Reading Room', 50), (3, '301', 'Conference Room', 15), "
-               "(4, '101', 'Studio', 25), (4, '201', 'Workshop', 30), "
-               "(5, '101', 'Meeting Room', 50), (5, '201', 'Event Hall', 200), "
-               "(6, '101', 'Computer Lab', 40), (6, '201', 'Lecture Hall', 100), "
-               "(7, '101', 'Lecture Hall', 80), (7, '201', 'Seminar Room', 30), "
-               "(8, '101', 'Lab', 20), (8, '201', 'Lab', 20), "
-               "(9, '101', 'Lab', 25), (9, '201', 'Lab', 25), "
-               "(10, '101', 'Lab', 30), (10, '201', 'Lab', 30), "
-               "(11, '101', 'Workshop', 35), (11, '201', 'Lab', 30), "
-               "(12, '101', 'Conference Room', 20), (12, '201', 'Research Lab', 15)");
+               "(1, '101', 'قاعة محاضرات', 100), (1, '102', 'قاعة محاضرات', 80), (1, '201', 'مختبر', 30), "
+               "(2, '101', 'قاعة محاضرات', 120), (2, '202', 'مختبر', 25), (2, '301', 'قاعة محاضرات', 90), "
+               "(3, '101', 'غرفة دراسة', 20), (3, '201', 'قاعة قراءة', 50), (3, '301', 'قاعة اجتماعات', 15), "
+               "(4, '101', 'استوديو', 25), (4, '201', 'ورشة عمل', 30), "
+               "(5, '101', 'قاعة اجتماعات', 50), (5, '201', 'قاعة فعاليات', 200), "
+               "(6, '101', 'مختبر حاسب', 40), (6, '201', 'قاعة محاضرات', 100), "
+               "(7, '101', 'قاعة محاضرات', 80), (7, '201', 'قاعة ندوات', 30), "
+               "(8, '101', 'مختبر', 20), (8, '201', 'مختبر', 20), "
+               "(9, '101', 'مختبر', 25), (9, '201', 'مختبر', 25), "
+               "(10, '101', 'مختبر', 30), (10, '201', 'مختبر', 30), "
+               "(11, '101', 'ورشة عمل', 35), (11, '201', 'مختبر', 30), "
+               "(12, '101', 'قاعة اجتماعات', 20), (12, '201', 'مختبر أبحاث', 15)");
     
-    // Seed Payments (sample revenue data)
+    // Seed Payments (Arabic descriptions)
     query.exec("INSERT INTO payments (student_id, amount, description, status, date) VALUES "
-               "(1, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-01'), "
-               "(2, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-01'), "
-               "(3, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-02'), "
-               "(4, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-02'), "
-               "(5, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-03'), "
-               "(6, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-03'), "
-               "(7, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-04'), "
-               "(8, 5000.00, 'Tuition Fee - Fall 2024', 'Paid', '2024-09-04'), "
-               "(1, 500.00, 'Lab Fee', 'Paid', '2024-09-15'), "
-               "(2, 500.00, 'Lab Fee', 'Paid', '2024-09-15'), "
-               "(3, 500.00, 'Lab Fee', 'Paid', '2024-09-16'), "
-               "(4, 500.00, 'Lab Fee', 'Paid', '2024-09-16')");
+               "(1, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-01'), "
+               "(2, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-01'), "
+               "(3, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-02'), "
+               "(4, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-02'), "
+               "(5, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-03'), "
+               "(6, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-03'), "
+               "(7, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-04'), "
+               "(8, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-04'), "
+               "(9, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-05'), "
+               "(10, 5000.00, 'رسوم دراسية - الفصل الدراسي الأول 2024', 'Paid', '2024-09-05'), "
+               "(1, 500.00, 'رسوم المختبر', 'Paid', '2024-09-15'), "
+               "(2, 500.00, 'رسوم المختبر', 'Paid', '2024-09-15'), "
+               "(3, 500.00, 'رسوم المختبر', 'Paid', '2024-09-16'), "
+               "(4, 500.00, 'رسوم المختبر', 'Paid', '2024-09-16'), "
+               "(5, 500.00, 'رسوم المختبر', 'Paid', '2024-09-17'), "
+               "(6, 500.00, 'رسوم المختبر', 'Paid', '2024-09-17'), "
+               "(1, 300.00, 'رسوم المكتبة', 'Paid', '2024-09-20'), "
+               "(2, 300.00, 'رسوم المكتبة', 'Paid', '2024-09-20'), "
+               "(3, 300.00, 'رسوم المكتبة', 'Pending', '2024-09-25'), "
+               "(4, 300.00, 'رسوم المكتبة', 'Pending', '2024-09-25')");
     
-    // Seed Library Books
+    // Seed Announcements (Arabic)
+    query.exec("INSERT INTO announcements (title, content, date, target_role) VALUES "
+               "('بدء الفصل الدراسي الأول', 'نود إعلامكم بأن الفصل الدراسي الأول يبدأ يوم الأحد الموافق 15 سبتمبر 2024. نتمنى لجميع الطلاب عاماً دراسياً موفقاً.', '2024-09-10 10:00:00', 'All'), "
+               "('جدول الامتحانات النهائية', 'تم نشر جدول الامتحانات النهائية للفصل الدراسي الأول. يرجى مراجعة الموقع الرسمي للجامعة.', '2024-09-20 14:30:00', 'Student'), "
+               "('اجتماع أعضاء هيئة التدريس', 'سيتم عقد اجتماع لأعضاء هيئة التدريس يوم الخميس الموافق 25 سبتمبر في قاعة الاجتماعات الرئيسية.', '2024-09-22 09:00:00', 'Faculty'), "
+               "('ورشة عمل عن الذكاء الاصطناعي', 'تدعو الجامعة جميع الطلاب لحضور ورشة عمل عن الذكاء الاصطناعي وتطبيقاته يوم السبت الموافق 5 أكتوبر.', '2024-09-28 16:00:00', 'Student'), "
+               "('تحديثات المكتبة', 'تم تحديث مجموعة الكتب في المكتبة. يمكن للطلاب استعارة الكتب الجديدة اعتباراً من اليوم.', '2024-09-30 11:00:00', 'All'), "
+               "('إعلان مهم: رسوم الفصل الدراسي', 'نذكر جميع الطلاب بضرورة سداد رسوم الفصل الدراسي قبل نهاية الشهر الجاري لتجنب أي تأخير.', '2024-10-01 10:00:00', 'Student'), "
+               "('مؤتمر البحث العلمي', 'سيتم تنظيم مؤتمر للبحث العلمي في ديسمبر 2024. نرحب بمشاركة أعضاء هيئة التدريس والطلاب.', '2024-10-05 12:00:00', 'All')");
+    
+    // Seed Calendar Events (Arabic)
+    query.exec("INSERT INTO calendar_events (date, time, title, type, description) VALUES "
+               "('2024-09-15', '08:00:00', 'بدء الفصل الدراسي الأول', 'Class', 'أول يوم في الفصل الدراسي الأول'), "
+               "('2024-09-20', '10:00:00', 'اختبار قصير - مقدمة في البرمجة', 'Exam', 'اختبار قصير في مقرر مقدمة في البرمجة'), "
+               "('2024-09-25', '14:00:00', 'اجتماع أعضاء هيئة التدريس', 'Meeting', 'اجتماع دوري لأعضاء هيئة التدريس'), "
+               "('2024-10-06', '00:00:00', 'عيد الأضحى', 'Holiday', 'عطلة رسمية بمناسبة عيد الأضحى المبارك'), "
+               "('2024-10-07', '00:00:00', 'عيد الأضحى', 'Holiday', 'عطلة رسمية بمناسبة عيد الأضحى المبارك'), "
+               "('2024-10-15', '23:59:00', 'آخر موعد لتسليم الواجب الأول', 'Assignment Due', 'آخر موعد لتسليم الواجب الأول في مقرر هياكل البيانات'), "
+               "('2024-10-20', '10:00:00', 'اختبار - أنظمة قواعد البيانات', 'Exam', 'اختبار في مقرر أنظمة قواعد البيانات'), "
+               "('2024-11-10', '23:59:00', 'آخر موعد لتسليم مشروع هندسة البرمجيات', 'Assignment Due', 'آخر موعد لتسليم مشروع مقرر هندسة البرمجيات'), "
+               "('2024-11-20', '00:00:00', 'عيد الفطر', 'Holiday', 'عطلة رسمية بمناسبة عيد الفطر'), "
+               "('2024-12-01', '08:00:00', 'بدء فترة الامتحانات النهائية', 'Exam', 'بدء فترة الامتحانات النهائية للفصل الدراسي الأول'), "
+               "('2024-12-20', '17:00:00', 'نهاية الفصل الدراسي الأول', 'Other', 'نهاية الفصل الدراسي الأول وبدء الإجازة'), "
+               "('2024-12-25', '00:00:00', 'رأس السنة الميلادية', 'Holiday', 'عطلة رسمية بمناسبة رأس السنة الميلادية')");
+    
+    // Seed Library Books (Arabic titles and authors)
     query.exec("INSERT INTO books (isbn, title, author, publisher, publication_year, category, total_copies, available_copies, location) VALUES "
-               "('978-0131103627', 'The C++ Programming Language', 'Bjarne Stroustrup', 'Addison-Wesley', 2013, 'Computer Science', 5, 3, 'Main Library - CS Section'), "
-               "('978-0201633610', 'Design Patterns: Elements of Reusable Object-Oriented Software', 'Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides', 'Addison-Wesley', 1994, 'Computer Science', 3, 1, 'Main Library - CS Section'), "
-               "('978-0132350884', 'Clean Code: A Handbook of Agile Software Craftsmanship', 'Robert C. Martin', 'Prentice Hall', 2008, 'Computer Science', 4, 4, 'Main Library - CS Section'), "
-               "('978-0321751041', 'The Art of Computer Programming', 'Donald Knuth', 'Addison-Wesley', 2011, 'Computer Science', 2, 2, 'Main Library - Reference'), "
-               "('978-1449331818', 'Learning React: Modern Patterns for Developing React Apps', 'Alex Banks, Eve Porcello', 'O''Reilly Media', 2020, 'Computer Science', 3, 2, 'Main Library - CS Section'), "
-               "('978-0596007126', 'Head First Design Patterns', 'Eric Freeman, Elisabeth Robson', 'O''Reilly Media', 2004, 'Computer Science', 4, 3, 'Main Library - CS Section'), "
-               "('978-0134685991', 'Effective Java', 'Joshua Bloch', 'Addison-Wesley', 2018, 'Computer Science', 3, 2, 'Main Library - CS Section'), "
-               "('978-0135957059', 'The Pragmatic Programmer', 'Andrew Hunt, David Thomas', 'Addison-Wesley', 2019, 'Computer Science', 5, 4, 'Main Library - CS Section'), "
-               "('978-1491950358', 'Building Microservices', 'Sam Newman', 'O''Reilly Media', 2021, 'Computer Science', 2, 1, 'Main Library - CS Section'), "
-               "('978-0596009205', 'Head First Java', 'Kathy Sierra, Bert Bates', 'O''Reilly Media', 2005, 'Computer Science', 6, 5, 'Main Library - CS Section'), "
-               "('978-0132778046', 'Introduction to Algorithms', 'Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein', 'MIT Press', 2009, 'Computer Science', 4, 3, 'Main Library - CS Section'), "
-               "('978-1491929125', 'Python Crash Course', 'Eric Matthes', 'No Starch Press', 2019, 'Computer Science', 5, 4, 'Main Library - CS Section'), "
-               "('978-0134092669', 'Database System Concepts', 'Abraham Silberschatz, Henry F. Korth, S. Sudarshan', 'McGraw-Hill', 2019, 'Computer Science', 3, 2, 'Main Library - CS Section'), "
-               "('978-1119806916', 'Operating System Concepts', 'Abraham Silberschatz, Peter Baer Galvin, Greg Gagne', 'Wiley', 2021, 'Computer Science', 4, 3, 'Main Library - CS Section'), "
-               "('978-0133594140', 'Computer Networks', 'Andrew S. Tanenbaum, David J. Wetherall', 'Prentice Hall', 2013, 'Computer Science', 3, 2, 'Main Library - CS Section')");
+               "('978-0131103627', 'لغة البرمجة C++', 'بيارن ستروستروب', 'أديسون ويسلي', 2013, 'علوم الحاسب', 5, 3, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0201633610', 'أنماط التصميم: عناصر البرمجة الكائنية القابلة لإعادة الاستخدام', 'إريك جاما، ريتشارد هيلم، رالف جونسون، جون فليسايدز', 'أديسون ويسلي', 1994, 'علوم الحاسب', 3, 1, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0132350884', 'الكود النظيف: دليل البرمجة المرنة', 'روبرت سي مارتن', 'برنتيس هول', 2008, 'علوم الحاسب', 4, 4, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0321751041', 'فن البرمجة', 'دونالد كنوث', 'أديسون ويسلي', 2011, 'علوم الحاسب', 2, 2, 'المكتبة الرئيسية - مرجع'), "
+               "('978-1449331818', 'تعلم React: أنماط حديثة لتطوير تطبيقات React', 'أليكس بانكس، إيف بورسيلو', 'أورايلي ميديا', 2020, 'علوم الحاسب', 3, 2, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0596007126', 'أنماط التصميم للعقول المتقدمة', 'إريك فريمان، إليزابيث روبسون', 'أورايلي ميديا', 2004, 'علوم الحاسب', 4, 3, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0134685991', 'Java الفعال', 'جوشوا بلوخ', 'أديسون ويسلي', 2018, 'علوم الحاسب', 3, 2, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0135957059', 'المبرمج العملي', 'أندرو هنت، ديفيد توماس', 'أديسون ويسلي', 2019, 'علوم الحاسب', 5, 4, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-1491950358', 'بناء الخدمات الصغيرة', 'سام نيومان', 'أورايلي ميديا', 2021, 'علوم الحاسب', 2, 1, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0596009205', 'Java للعقول المتقدمة', 'كاثي سييرا، بيرت بيتس', 'أورايلي ميديا', 2005, 'علوم الحاسب', 6, 5, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0132778046', 'مقدمة في الخوارزميات', 'توماس إتش كورمن، تشارلز إي لايسرسون، رونالد إل ريفيست، كليفورد شتاين', 'مطبعة MIT', 2009, 'علوم الحاسب', 4, 3, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-1491929125', 'دورة تعلم Python السريعة', 'إريك ماثيس', 'نو ستارش برس', 2019, 'علوم الحاسب', 5, 4, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0134092669', 'مفاهيم أنظمة قواعد البيانات', 'أبراهام سيلبرشاتز، هنري إف كورث، س. سودارشان', 'ماغراو هيل', 2019, 'علوم الحاسب', 3, 2, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-1119806916', 'مفاهيم نظم التشغيل', 'أبراهام سيلبرشاتز، بيتر بير جالفين، جريج جاجن', 'وايلي', 2021, 'علوم الحاسب', 4, 3, 'المكتبة الرئيسية - قسم علوم الحاسب'), "
+               "('978-0133594140', 'شبكات الحاسب', 'أندرو إس تانينباوم، ديفيد جي ويثيرال', 'برنتيس هول', 2013, 'علوم الحاسب', 3, 2, 'المكتبة الرئيسية - قسم علوم الحاسب')");
 }

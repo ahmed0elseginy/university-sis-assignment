@@ -47,3 +47,43 @@ std::vector<Enrollment> EnrollmentRepository::getAllEnrollments() {
     }
     return list;
 }
+
+std::vector<Enrollment> EnrollmentRepository::getAllEnrollmentsWithNames() {
+    std::vector<Enrollment> list;
+    QSqlDatabase db = DatabaseManager::instance().getDatabase();
+    QSqlQuery query(db);
+    
+    query.prepare("SELECT ss.student_id, s.name as student_name, ss.section_id "
+                  "FROM student_section ss "
+                  "LEFT JOIN students s ON ss.student_id = s.student_id "
+                  "ORDER BY s.name, ss.section_id");
+    
+    if (!query.exec()) {
+        qDebug() << "Get Enrollments With Names Error:" << query.lastError().text();
+        return list;
+    }
+    
+    while (query.next()) {
+        Enrollment e;
+        e.studentId = query.value(0).toInt();
+        e.studentName = query.value(1).toString();
+        e.sectionId = query.value(2).toInt();
+        list.push_back(e);
+    }
+    return list;
+}
+
+std::vector<int> EnrollmentRepository::getStudentIdsBySection(int sectionId) {
+    std::vector<int> studentIds;
+    QSqlDatabase db = DatabaseManager::instance().getDatabase();
+    QSqlQuery query(db);
+    query.prepare("SELECT student_id FROM student_section WHERE section_id = :secid");
+    query.bindValue(":secid", sectionId);
+    
+    if (query.exec()) {
+        while (query.next()) {
+            studentIds.push_back(query.value(0).toInt());
+        }
+    }
+    return studentIds;
+}

@@ -13,6 +13,12 @@ public:
     
     // Returns list of (Student ID, Section ID) pairs
     std::vector<Enrollment> getAllEnrollments();
+    
+    // Returns enrollments with student names (JOIN query)
+    std::vector<Enrollment> getAllEnrollmentsWithNames();
+    
+    // Returns list of student IDs enrolled in a specific section
+    std::vector<int> getStudentIdsBySection(int sectionId);
 };
 
 #endif // ENROLLMENTREPOSITORY_H

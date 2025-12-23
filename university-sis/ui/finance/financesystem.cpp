@@ -49,9 +49,9 @@ void FinanceSystem::setupUi()
     // Table
     m_view = new QTableView(this);
     m_model = new QStandardItemModel(this);
-    m_model->setColumnCount(7); 
-    // ID, Student ID, Amount, Description, Status, Date, Actions
-    m_model->setHorizontalHeaderLabels({"ID", "Student ID", "Amount", "Description", "Status", "Date", "Actions"});
+    m_model->setColumnCount(8); 
+    // ID, Student ID, Student Name, Amount, Description, Status, Date, Actions
+    m_model->setHorizontalHeaderLabels({"ID", "Student ID", "Student Name", "Amount", "Description", "Status", "Date", "Actions"});
     
     m_view->setModel(m_model);
     styleTable();
@@ -68,7 +68,7 @@ void FinanceSystem::styleTable()
     m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_view->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     m_view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_view->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    m_view->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
     
     m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_view->setAlternatingRowColors(true);
@@ -82,12 +82,13 @@ void FinanceSystem::styleTable()
 void FinanceSystem::loadPayments()
 {
     m_model->removeRows(0, m_model->rowCount());
-    auto payments = m_repo.getAllPayments();
+    auto payments = m_repo.getAllPaymentsWithNames();
     
     for (const auto &p : payments) {
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::number(p.id));
         row << new QStandardItem(QString::number(p.studentId));
+        row << new QStandardItem(p.studentName.isEmpty() ? "N/A" : p.studentName);
         row << new QStandardItem(QString("$%1").arg(p.amount, 0, 'f', 2));
         row << new QStandardItem(p.description);
         
@@ -128,7 +129,7 @@ void FinanceSystem::loadPayments()
         connect(editBtn, &QPushButton::clicked, this, [this, paymentId]() { editPayment(paymentId); });
         connect(deleteBtn, &QPushButton::clicked, this, [this, paymentId]() { deletePayment(paymentId); });
 
-        m_view->setIndexWidget(m_model->index(m_model->rowCount() - 1, 6), actionWidget);
+        m_view->setIndexWidget(m_model->index(m_model->rowCount() - 1, 7), actionWidget);
     }
 }
 
